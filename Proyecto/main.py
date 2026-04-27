@@ -13,19 +13,18 @@ from src import eda as eda
 from src import evaluation as ev
 import matplotlib.pyplot as plt
 import os
+import time
 
-
+directorio = '/Users/pabloag/uni/loan_aproval/Proyecto/'
 
 def main():
-    os.system('cls')
+    os.system('clear')
 
     print('Cargando datos...')
-    df = pd.read_csv("data/loan_data.csv")
+    df = pd.read_csv(directorio + "data/loan_data.csv")
 
+    input('Pulsa Enter para cerrar el programa..')
 
-    
-
-    input('Presiona enter para cerrar el programa')
 
 #############################################
 # ONLY DEBUGGING PURPOSES, DELETE THIS LATER#

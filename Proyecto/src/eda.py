@@ -117,6 +117,7 @@ def show_dataset_info(df, plot=False):
         plt.show()
         plt.close(fig)
 
+# CLUSTERING
 def kmeans():
     
     pass

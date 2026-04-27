@@ -4,6 +4,10 @@ import math
 import matplotlib.pyplot as plt
 
 
+#########################################################################
+# FALTA POR IMPLEMENTAR LA REGULARIZACIÓN *** HACER ***
+
+
 def sigmoid(z):
     
     g = 1 / (1 + np.exp(-z))
