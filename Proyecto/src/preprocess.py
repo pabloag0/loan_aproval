@@ -1,4 +1,5 @@
 ﻿from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import numpy as np
 
@@ -60,54 +61,6 @@ def normalize(X_train, X_test):
 
     return X_train_norm, X_test_norm
 
-
-def preprocess(df, split=False, test_size=0.25, random_state=42):
-    """Funcion principal que llama a todas las anteriores en orden
-       y devuelve X_train, X_val, X_test, y_train, y_val, y_test"""
-    
-    if check_nulls(df):
-        handle_nulls(df)
-
-    df = encode_categoricals(df)
-
-    X = df.drop(columns=['loan_status'])
-    y = df['loan_status']
-
-    if not split:
-        X = X.to_numpy()
-        y = y.to_numpy().reshape(-1, 1)
-
-        X, _ = normalize(X, X)  # Normalizamos todo junto si no hay split
-
-        return X, y
-    
-    X_train, X_test, Y_train, Y_test = train_test_split(X, y, random_state=42, test_size=0.25, stratify=y)
-
-    X_train = X_train.to_numpy()
-    X_test = X_test.to_numpy()
-    Y_train = Y_train.to_numpy().reshape(-1, 1)
-    Y_test = Y_test.to_numpy().reshape(-1, 1)
-
-    X_train, X_test = normalize(X_train, X_test)
-
-    return X_train, X_test, Y_train, Y_test
-
-# PREPROCESADO PARA REGRESIÓN LOGÍSTICA
-def preprocess_lr(df, split=False, test_size=0.25, random_state=42):
-    """Preprocesa los datos para regresion logistica."""
-    if not split:
-        X, y = preprocess(df, split=split, test_size=test_size, random_state=random_state)
-        return X, y.ravel()
-
-    X_train, X_test, Y_train, Y_test = preprocess(
-        df,
-        split=split,
-        test_size=test_size,
-        random_state=random_state
-    )
-
-    return X_train, X_test, Y_train.ravel(), Y_test.ravel()
-
 # SUBMUESTREO PARA BALANCEAR CLASES
 def balance_by_loan_status(df: pd.DataFrame, random_state=42):
 
@@ -130,6 +83,86 @@ def balance_by_loan_status(df: pd.DataFrame, random_state=42):
     balanced_df = balanced_df.sample(frac=1, random_state=random_state).reset_index(drop=True)
 
     return balanced_df
+
+
+def preprocess(df: pd.DataFrame, split=False, lr=False, test_size=0.25, random_state=42):
+    """Funcion principal que llama a todas las anteriores en orden
+       y devuelve X_train, X_val, X_test, y_train, y_val, y_test"""
+    
+    df = balance_by_loan_status(df) # ¡¡¡ DATA LEAKAGE, DIVIDIR ANTES DE BALANCEAR !!!
+    
+    if check_nulls(df):
+        handle_nulls(df)
+
+    df = encode_categoricals(df)
+
+    X = df.drop(columns=['loan_status'])
+    y = df['loan_status']
+
+    if not split:
+        X = X.to_numpy()
+        y = y.to_numpy().reshape(-1, 1)
+
+        X, _ = normalize(X, X)  # Normalizamos todo junto si no hay split
+
+        if not lr:
+            return X, y
+        else:
+            return X, y.ravel()
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25, stratify=y)
+
+    X_train, X_test = normalize(X_train, X_test)
+
+    y_train = y_train.to_numpy()
+    y_test = y_test.to_numpy()
+
+    if lr:
+        return X_train, X_test, y_train.ravel(), y_test.ravel()
+    
+    X_train = X_train.to_numpy()
+    X_test = X_test.to_numpy()
+    y_train = y_train.reshape(-1, 1)
+    y_test = y_test.reshape(-1, 1)
+
+    return X_train, X_test, y_train, y_test
+
+def preprocess_kmeans(df: pd.DataFrame):
+    """Preprocesado específico para clustering"""
+    # Aquí podríamos hacer un preprocesado específico para clustering, como escalar las características, eliminar outliers, etc.
+
+    if check_nulls(df):
+        handle_nulls(df)
+    
+    df = encode_categoricals(df)
+
+    handle_outliers(df)
+
+    X = df.drop(columns=['loan_status'])
+    
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    return X_scaled, X.columns, scaler
+
+"""
+# PREPROCESADO PARA REGRESIÓN LOGÍSTICA
+def preprocess_lr(df, split=False, test_size=0.25, random_state=42):
+    ""Preprocesa los datos para regresion logistica.""
+    if not split:
+        X, y = preprocess(df, split=split, test_size=test_size, random_state=random_state)
+        return X, y.ravel()
+
+    X_train, X_test, Y_train, Y_test = preprocess(
+        df,
+        split=split,
+        test_size=test_size,
+        random_state=random_state
+    )
+
+    return X_train, X_test, Y_train.ravel(), Y_test.ravel()
+"""
+
 
 #############################################
 # ONLY DEBUGGING PURPOSES, DELETE THIS LATER#

@@ -198,8 +198,8 @@ def ejecutar(X_train, X_test, y_train, y_test, seed=42):
     en una validacion interna del conjunto de entrenamiento.
     """
 
-    # device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     input_size = X_train.shape[1]
 

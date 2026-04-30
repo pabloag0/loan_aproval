@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import math
+from sklearn.cluster import KMeans
 
 
 
@@ -118,14 +119,11 @@ def show_dataset_info(df, plot=False):
         plt.close(fig)
 
 # CLUSTERING
-def kmeans():
-    
+def kmeans(X):
+    # No se puede aplazar más, toca clustering
+    model = KMeans(n_clusters=10, random_state=42, n_init=10)
+    clusters = model.fit_predict(X)
+    return model, clusters
+
+if __name__ == "__main__":
     pass
-
-
-#############################################
-# ONLY DEBUGGING PURPOSES, DELETE THIS LATER#
-#############################################
-import sys                                  #
-sys.dont_write_bytecode = True              #
-#############################################

@@ -23,14 +23,19 @@ def main():
     print('Cargando datos...')
     df = pd.read_csv(directorio + "data/loan_data.csv")
 
+    X_train, X_test, y_train, y_test = pp.preprocess(df, split=True, lr=True)
+
+    w_in = np.zeros(X_train.shape[1])
+    w, b, j = lr.train(X_train, y_train, w_in, lambda_=0.01, reg=True, num_iters=10000)
+    w2, b2, j2 = lr.train(X_train, y_train, w_in, lambda_=0.01, reg=False, num_iters=10000)
+
+    y_pred = lr.predict(X_test, w, b)
+    y_pred2 = lr.predict(X_test, w2, b2)
+    accuracy = np.mean(y_test== y_pred)*100
+    accuracy2 = np.mean(y_test== y_pred2)*100
+    print(f'Accuracy (Regularized): {accuracy}')
+    print(f'Accuracy (Non-Regularized): {accuracy2}')
+
     input('Pulsa Enter para cerrar el programa..')
-
-
-#############################################
-# ONLY DEBUGGING PURPOSES, DELETE THIS LATER#
-#############################################
-import sys                                  #
-sys.dont_write_bytecode = True              #
-#############################################
 
 main()

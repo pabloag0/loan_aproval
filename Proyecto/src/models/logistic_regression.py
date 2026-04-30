@@ -3,11 +3,6 @@ import copy
 import math
 import matplotlib.pyplot as plt
 
-
-#########################################################################
-# FALTA POR IMPLEMENTAR LA REGULARIZACIÓN *** HACER ***
-
-
 def sigmoid(z):
     
     g = 1 / (1 + np.exp(-z))
@@ -60,7 +55,7 @@ def compute_gradient(X, y, w, b, lambda_=None):
     return dj_db, dj_dw
 """
 
-def compute_gradient(X, y, w, b, lambda_=None):
+def compute_gradient(X, y, w, b):
     m = X.shape[0]
 
     z = X @ w + b
@@ -82,12 +77,13 @@ def compute_cost_reg(X, y, w, b, lambda_=1):
     # Compute the cost without regularization
     cost_without_reg = compute_cost(X, y, w, b)
     
-    # Compute regularization term
+    # Compute regularization term (use numpy array to avoid pandas Series key errors)
     reg_term = 0
+    if lambda_ is None:
+        lambda_ = 0
     if lambda_ != 0:
-        for i in range(n):
-            reg_term += w[i]**2
-        reg_term *= lambda_ / (2 * m)
+        w_arr = np.asarray(w, dtype=float).ravel()
+        reg_term = (lambda_ / (2 * m)) * np.sum(w_arr ** 2)
     
     total_cost = cost_without_reg + reg_term
 
@@ -95,28 +91,24 @@ def compute_cost_reg(X, y, w, b, lambda_=1):
 
 
 def compute_gradient_reg(X, y, w, b, lambda_=1):
-    """
-    Computes the gradient for linear regression 
 
-    Args:
-      X : (ndarray Shape (m,n))   variable such as house size 
-      y : (ndarray Shape (m,))    actual value 
-      w : (ndarray Shape (n,))    values of parameters of the model      
-      b : (scalar)                value of parameter of the model  
-      lambda_ : (scalar,float)    regularization constant
-    Returns
-      dj_db: (scalar)             The gradient of the cost w.r.t. the parameter b. 
-      dj_dw: (ndarray Shape (n,)) The gradient of the cost w.r.t. the parameters w. 
+    m = X.shape[0]
+        
+    dj_db, dj_dw = compute_gradient(X, y, w, b)
 
-    """
-    
+    if lambda_ is None:
+        lambda_ = 0
+    if lambda_ != 0:
+        w_arr = np.asarray(w, dtype=float).ravel()
+        dj_dw = dj_dw + (lambda_ / m) * w_arr
+
     return dj_db, dj_dw
 
 
 #########################################################################
 # gradient descent
 #
-def train(X, y, w_in, b_in, alpha, num_iters, lambda_=None):
+def train(X, y, w_in, b_in=0, alpha=0.01, num_iters=1000, lambda_=None, reg=False):
     m = len(X)
 
     J_history = []
@@ -124,13 +116,20 @@ def train(X, y, w_in, b_in, alpha, num_iters, lambda_=None):
     b = b_in
 
     for i in range(num_iters):
-        dj_db, dj_dw = compute_gradient(X, y, w, b, lambda_)
-        
+        if reg:
+            dj_db, dj_dw = compute_gradient_reg(X, y, w, b, lambda_)
+        else:
+            dj_db, dj_dw = compute_gradient(X, y, w, b)
+
         w -= alpha * dj_dw
         b -= alpha * dj_db
-
+    
         if i < 100000:  # prevent resource exhaustion
-            cost = compute_cost(X, y, w, b, lambda_)
+            if reg:
+                cost = compute_cost_reg(X, y, w, b, lambda_)
+            else:
+                cost = compute_cost(X, y, w, b)
+                
             J_history.append(cost)
         if i % math.ceil(num_iters / 10) == 0 or i == num_iters - 1:
             print(f"Iteraticion {i:4d}: Cost {float(J_history[-1]):8.2f}   ")
