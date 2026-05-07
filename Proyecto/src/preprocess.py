@@ -84,12 +84,24 @@ def balance_by_loan_status(df: pd.DataFrame, random_state=42):
 
     return balanced_df
 
+def erase_previous_defaults(df: pd.DataFrame):
+    
+    df = df[df["previous_loan_defaults_on_file"] == "No"]
+    df = df.drop(columns=["previous_loan_defaults_on_file"])
 
-def preprocess(df: pd.DataFrame, split=False, lr=False, test_size=0.25, random_state=42):
+    return df
+
+
+def preprocess(df: pd.DataFrame, split=False, lr=False, des=False, test_size=0.25, random_state=42):
     """Funcion principal que llama a todas las anteriores en orden
        y devuelve X_train, X_val, X_test, y_train, y_val, y_test"""
-    
-    df = balance_by_loan_status(df) # ¡¡¡ DATA LEAKAGE, DIVIDIR ANTES DE BALANCEAR !!!
+
+
+    erase_previous_defaults(df)
+
+    #df = balance_by_loan_status(df)
+
+
     
     if check_nulls(df):
         handle_nulls(df)
@@ -162,11 +174,3 @@ def preprocess_lr(df, split=False, test_size=0.25, random_state=42):
 
     return X_train, X_test, Y_train.ravel(), Y_test.ravel()
 """
-
-
-#############################################
-# ONLY DEBUGGING PURPOSES, DELETE THIS LATER#
-#############################################
-import sys                                  #
-sys.dont_write_bytecode = True              #
-#############################################

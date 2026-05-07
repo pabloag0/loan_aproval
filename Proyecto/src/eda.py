@@ -6,7 +6,7 @@ import math
 from sklearn.cluster import KMeans
 
 
-
+# EDA multivariable
 def show_dataset_info(df, plot=False):
     ages = pd.cut(df['person_age'], bins=[0, 18, 30, 50, 70, np.inf], labels=['minor', 'junior', 'mid_age', 'senior', 'elderly']).value_counts() 
     paridad = df['person_gender'].value_counts()
@@ -120,10 +120,32 @@ def show_dataset_info(df, plot=False):
 
 # CLUSTERING
 def kmeans(X):
-    # No se puede aplazar más, toca clustering
     model = KMeans(n_clusters=10, random_state=42, n_init=10)
     clusters = model.fit_predict(X)
     return model, clusters
+
+def impagos(df):
+
+    X = df['previous_loan_defaults_on_file'].replace({'Yes': 1, 'No': 0})
+    Y = df['loan_status']
+
+    # Casos con impago previo
+    mask_impago = X == 1
+
+    # Casos sin impago previo
+    mask_no_impago = X == 0
+
+    # Precision con impago: P(rechazo | impago)
+    impago = (Y[mask_impago] == 0).mean()
+
+    # Precision sin impago: P(aprobación | no impago)
+    pago = (Y[mask_no_impago] == 1).mean()
+
+    print('Precision con impago')
+    print(impago)
+
+    print('Precision sin impago')
+    print(pago)
 
 if __name__ == "__main__":
     pass

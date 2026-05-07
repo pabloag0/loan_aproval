@@ -79,28 +79,23 @@ def compute_cost_reg(X, y, w, b, lambda_=1):
     
     # Compute regularization term (use numpy array to avoid pandas Series key errors)
     reg_term = 0
-    if lambda_ is None:
-        lambda_ = 0
-    if lambda_ != 0:
-        w_arr = np.asarray(w, dtype=float).ravel()
-        reg_term = (lambda_ / (2 * m)) * np.sum(w_arr ** 2)
+
+    w_arr = np.asarray(w, dtype=float).ravel()
+    reg_term = (lambda_ / (2 * m)) * np.sum(w_arr ** 2)
     
     total_cost = cost_without_reg + reg_term
 
     return total_cost
 
 
-def compute_gradient_reg(X, y, w, b, lambda_=1):
+def compute_gradient_reg(X, y, w, b, lambda_):
 
     m = X.shape[0]
         
     dj_db, dj_dw = compute_gradient(X, y, w, b)
 
-    if lambda_ is None:
-        lambda_ = 0
-    if lambda_ != 0:
-        w_arr = np.asarray(w, dtype=float).ravel()
-        dj_dw = dj_dw + (lambda_ / m) * w_arr
+    w_arr = np.asarray(w, dtype=float).ravel()
+    dj_dw = dj_dw + (lambda_ / m) * w_arr
 
     return dj_db, dj_dw
 
@@ -108,8 +103,12 @@ def compute_gradient_reg(X, y, w, b, lambda_=1):
 #########################################################################
 # gradient descent
 #
-def train(X, y, w_in, b_in=0, alpha=0.01, num_iters=1000, lambda_=None, reg=False):
+def train(X, y, w_in, b_in=0, alpha=0.01, num_iters=1000, lambda_=None):
     m = len(X)
+    if lambda_ is None:
+        reg = False
+    else:
+        reg = True
 
     J_history = []
     w = copy.deepcopy(w_in)
@@ -129,7 +128,7 @@ def train(X, y, w_in, b_in=0, alpha=0.01, num_iters=1000, lambda_=None, reg=Fals
                 cost = compute_cost_reg(X, y, w, b, lambda_)
             else:
                 cost = compute_cost(X, y, w, b)
-                
+
             J_history.append(cost)
         if i % math.ceil(num_iters / 10) == 0 or i == num_iters - 1:
             print(f"Iteraticion {i:4d}: Cost {float(J_history[-1]):8.2f}   ")
@@ -160,6 +159,17 @@ def plot_data(X, y, pos_label="y=1", neg_label="y=0"):
 #########################################################################
 # predict
 #
+"""
+def predict(X, w, b):
+    z = np.dot(X, w) + b
+    p = (sigmoid(z) >= 0.5).astype(int)
+
+    # Regla determinista: si la última columna es 1 → predicción 0
+    mask = X.iloc[:, -1] == 1
+    p[mask] = 0
+
+    return p
+"""
 def predict(X, w, b):
 
     z = np.dot(X, w) + b
