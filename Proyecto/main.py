@@ -17,13 +17,24 @@ import time
 
 directorio = '/Users/pabloag/uni/loan_aproval/Proyecto/'
 
-def logistic_regression():
-    pass
+def logistic_regression(X_train, X_test, y_train):
 
-def neural_network():
-    pass
+    w, b, j = lr.train(X_train, y_train, np.zeros(X_train.shape[1]), 0, alpha=0.1, num_iters=30000, lambda_=1)
+    y_pred = lr.predict(X_test, w, b)
 
-def deep_neural_network():
+    return y_pred
+
+def neural_network(X_train, X_test, y_train):
+    
+    theta1, theta2 = nn.train(X_train, y_train, num_labels=1, alpha=0.1, num_iters=30000, hidden_size=16 , reg=0, input_size=X_train.shape[1])
+    y_pred = nn.predict(theta1, theta2, X_test)
+
+    return y_pred
+
+def deep_neural_network(X_train, X_test, y_train, y_test):
+    
+    dnn.ejecutar(X_train, X_test, y_train, y_test)
+    
     pass
 
 def main():
@@ -33,14 +44,18 @@ def main():
     df = pd.read_csv(directorio + "data/loan_data.csv")
 
     print('Preprocesando datos...')
-    X_train, X_test, y_train, y_test = pp.preprocess(df, split=True, lr=True, des=False)
+    X_train, X_test, y_train, y_test = pp.preprocess(df, split=True, lr=True)
 
+    print('Entrenando regresión logística: ')
+    y_pred = logistic_regression(X_train, X_test, y_train)
 
-    
-    w, b, j = lr.train(X_train, y_train, np.zeros(X_train.shape[1]), 0, alpha=0.01, num_iters=1000, lambda_=1)
-    y_pred = lr.predict(X_test, w, b)
+    #print('Entrenando red neuronal...')
+    #y_pred = neural_network(X_train, X_test, y_train)
+
     acc = np.mean(y_pred == y_test)*100
     print(f"Logistic Regression Accuracy: {acc:.2f}%")
+
+    #deep_neural_network(X_train, X_test, y_train, y_test)
 
     input('Pulsa Enter para cerrar el programa..')
 

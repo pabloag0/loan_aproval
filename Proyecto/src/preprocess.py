@@ -9,13 +9,15 @@ import numpy as np
 # Hay que compensar el desbalanceo (submuestreo o sobremuestreo)
 # Hay que valorar/eliminar outliers
 
+
+# ESTO PERTENECE AL EDA
 def check_nulls(df):
     """Detecta y muestra valores nulos"""
     null_counts = df.isnull().sum()
     null_columns = null_counts[null_counts > 0]
 
     if null_columns.empty:
-        print('No se han encontrado valores nulos en el dataset.')
+        #print('No se han encontrado valores nulos en el dataset.')
         return False
 
     print('Se han encontrado valores nulos en las siguientes columnas:')
@@ -29,15 +31,17 @@ def handle_nulls(df):
     no tiene valores nulos"""
     pass
 
-def encode_categoricals(df: pd.DataFrame):
+def encode_categoricals(df: pd.DataFrame, defaults=False):
     """Convierte columnas de texto a nÃºmeros (label encoding o one-hot)"""
     categorical_cols = [
         "person_gender",
         "person_education",
         "person_home_ownership",
-        "loan_intent",
-        "previous_loan_defaults_on_file"
+        "loan_intent"
     ]
+
+    if defaults:
+        categorical_cols.append("previous_loan_defaults_on_file")
 
     df = pd.get_dummies(df, columns=categorical_cols, drop_first=True, dtype=int)
 
@@ -84,34 +88,24 @@ def balance_by_loan_status(df: pd.DataFrame, random_state=42):
 
     return balanced_df
 
-def erase_previous_defaults(df: pd.DataFrame):
-    
-    df = df[df["previous_loan_defaults_on_file"] == "No"]
-    df = df.drop(columns=["previous_loan_defaults_on_file"])
+def erase_previous_defaults(X: pd.DataFrame, y: pd.DataFrame):
 
-    return df
+    mask_no_defaults = X["previous_loan_defaults_on_file"] == "No"
+    X = X[mask_no_defaults]
+    y = y[mask_no_defaults]
+
+    return X, y
 
 
-def preprocess(df: pd.DataFrame, split=False, lr=False, des=False, test_size=0.25, random_state=42):
+def preprocess(df: pd.DataFrame, split=True, lr=False, des=False, test_size=0.25, random_state=42):
     """Funcion principal que llama a todas las anteriores en orden
        y devuelve X_train, X_val, X_test, y_train, y_val, y_test"""
-
-
-    erase_previous_defaults(df)
-
-    #df = balance_by_loan_status(df)
-
-
-    
-    if check_nulls(df):
-        handle_nulls(df)
-
-    df = encode_categoricals(df)
 
     X = df.drop(columns=['loan_status'])
     y = df['loan_status']
 
     if not split:
+
         X = X.to_numpy()
         y = y.to_numpy().reshape(-1, 1)
 
@@ -123,6 +117,9 @@ def preprocess(df: pd.DataFrame, split=False, lr=False, des=False, test_size=0.2
             return X, y.ravel()
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25, stratify=y)
+
+    X_train, y_train = erase_previous_defaults(X_train, y_train)
+    X_train = encode_categoricals(X_train, defaults=True)
 
     X_train, X_test = normalize(X_train, X_test)
 
