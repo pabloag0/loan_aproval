@@ -9,6 +9,8 @@ import numpy as np
 # Hay que compensar el desbalanceo (submuestreo o sobremuestreo)
 # Hay que valorar/eliminar outliers
 
+# Feature engineering
+
 
 # ESTO PERTENECE AL EDA
 def check_nulls(df):

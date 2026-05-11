@@ -2,6 +2,8 @@
 # carga de datos, preprocesado, entrenamiento de todos los modelos, evaluación y guardado de gráficas. 
 # El enunciado lo exige explícitamente.
 
+# smote
+
 import random
 import numpy as np
 import pandas as pd
@@ -15,18 +17,20 @@ import matplotlib.pyplot as plt
 import os
 import time
 
-directorio = '/Users/pabloag/uni/loan_aproval/Proyecto/'
+#directorio = '/Users/pabloag/uni/loan_aproval/Proyecto/'
+directorio = 'D:/onedrive/OneDrive - Universidad Complutense de Madrid (UCM)/uni/3/2/AA/proyecto_git/loan_aproval/Proyecto/'
+
 
 def logistic_regression(X_train, X_test, y_train):
 
-    w, b, j = lr.train(X_train, y_train, np.zeros(X_train.shape[1]), 0, alpha=0.1, num_iters=30000, lambda_=1)
+    w, b, j = lr.train(X_train, y_train, np.zeros(X_train.shape[1]), 0, alpha=0.1, num_iters=300, lambda_=1)
     y_pred = lr.predict(X_test, w, b)
 
     return y_pred
 
 def neural_network(X_train, X_test, y_train):
     
-    theta1, theta2 = nn.train(X_train, y_train, num_labels=1, alpha=0.1, num_iters=30000, hidden_size=16 , reg=0, input_size=X_train.shape[1])
+    theta1, theta2 = nn.train(X_train, y_train, num_labels=1, alpha=0.1, num_iters=300, hidden_size=16 , reg=0, input_size=X_train.shape[1])
     y_pred = nn.predict(theta1, theta2, X_test)
 
     return y_pred
@@ -38,7 +42,7 @@ def deep_neural_network(X_train, X_test, y_train, y_test):
     pass
 
 def main():
-    os.system('clear')
+    os.system('cls')
 
     print('Cargando datos...')
     df = pd.read_csv(directorio + "data/loan_data.csv")
@@ -47,15 +51,15 @@ def main():
     X_train, X_test, y_train, y_test = pp.preprocess(df, split=True, lr=True)
 
     print('Entrenando regresión logística: ')
-    y_pred = logistic_regression(X_train, X_test, y_train)
+    #y_pred = logistic_regression(X_train, X_test, y_train)
 
     #print('Entrenando red neuronal...')
     #y_pred = neural_network(X_train, X_test, y_train)
 
-    acc = np.mean(y_pred == y_test)*100
-    print(f"Logistic Regression Accuracy: {acc:.2f}%")
+    #acc = np.mean(y_pred == y_test)*100
+    #print(f"Logistic Regression Accuracy: {acc:.2f}%")
 
-    #deep_neural_network(X_train, X_test, y_train, y_test)
+    deep_neural_network(X_train, X_test, y_train, y_test)
 
     input('Pulsa Enter para cerrar el programa..')
 
