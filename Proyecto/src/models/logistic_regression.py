@@ -173,7 +173,7 @@ def predict(X, w, b):
 def predict(X, w, b):
 
     z = np.dot(X, w) + b
-    p = sigmoid(z) >= 0.5
+    p = sigmoid(z) >= 0.65
 
     return p.astype(int)
 

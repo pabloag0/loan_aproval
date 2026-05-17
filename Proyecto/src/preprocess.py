@@ -1,5 +1,6 @@
 ﻿from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE
 import pandas as pd
 import numpy as np
 
@@ -10,9 +11,6 @@ import numpy as np
 # Hay que valorar/eliminar outliers
 
 # Feature engineering
-
-
-# ESTO PERTENECE AL EDA
 def check_nulls(df):
     """Detecta y muestra valores nulos"""
     null_counts = df.isnull().sum()
@@ -102,6 +100,7 @@ def erase_previous_defaults(X: pd.DataFrame, y: pd.DataFrame):
 def preprocess(df: pd.DataFrame, split=True, lr=False, des=False, test_size=0.25, random_state=42):
     """Funcion principal que llama a todas las anteriores en orden
        y devuelve X_train, X_val, X_test, y_train, y_val, y_test"""
+    
 
     X = df.drop(columns=['loan_status'])
     y = df['loan_status']
@@ -120,10 +119,15 @@ def preprocess(df: pd.DataFrame, split=True, lr=False, des=False, test_size=0.25
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25, stratify=y)
 
-    X_train, y_train = erase_previous_defaults(X_train, y_train)
+    #X_train, y_train = erase_previous_defaults(X_train, y_train)
     X_train = encode_categoricals(X_train, defaults=True)
+    X_test = encode_categoricals(X_test, defaults=True)
+
+    sm = SMOTE(random_state=42)
 
     X_train, X_test = normalize(X_train, X_test)
+
+    #X_train, y_train = sm.fit_resample(X_train, y_train)
 
     y_train = y_train.to_numpy()
     y_test = y_test.to_numpy()
