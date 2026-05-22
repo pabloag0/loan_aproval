@@ -135,11 +135,15 @@ def preprocess(df: pd.DataFrame, lr=False, balance=False, test_size=0.25, random
     return X_train, X_test, y_train, y_test
 """
 
-def preprocess(X_train, X_test, y_train, y_test, lr=False):
+def preprocess(X_train, X_test, y_train, y_test, lr=False, balance=False):
     
     # faltra filtrar por y tambien
     # X_train = handle_outliers(X_train)
     # X_test = handle_outliers(X_test)
+
+    if balance:
+        X_train, y_train = balance_by_loan_status(X_train, y_train)
+
 
     X_train = encode_categoricals(X_train, defaults=True)
     X_test = encode_categoricals(X_test, defaults=True)

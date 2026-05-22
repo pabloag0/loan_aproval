@@ -83,8 +83,6 @@ def main():
     X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(X_train, X_test, y_train, y_test, lr=True)
     X_train, X_test, y_train, y_test = pp.preprocess(X_train, X_test, y_train, y_test)
 
-
-
     # refit
     y_pred_lr = logistic_regression(X_train_lr, X_test_lr, y_train_lr)
     y_pred_nn = neural_network(X_train, X_test, y_train)
@@ -95,7 +93,31 @@ def main():
     ev.evaluate(y_pred_nn, y_test)
     print("Red neuronal profunda en test:")
 
+
+    print("Ahora corrigiendo el desbalanceo con submuestreo: ")
+    X_train, X_test, y_train, y_test = pp.split(df)
+
+    print("Regresión logística:")
+    val.cross_validate(X_train, y_train, logistic_regression, folds=5, lr=True, balance=True)
     
+    print("Red neuronal:")
+    val.cross_validate(X_train, y_train, neural_network, folds=5, balance=True)
+    
+    print("Red neuronal profunda:")
+    val.cross_validate(X_train, y_train, deep_neural_network, folds=5, balance=True)
+
+    X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(X_train, X_test, y_train, y_test, lr=True, balance=True)
+    X_train, X_test, y_train, y_test = pp.preprocess(X_train, X_test, y_train, y_test, balance=True)
+
+    # refit
+    y_pred_lr = logistic_regression(X_train_lr, X_test_lr, y_train_lr)
+    y_pred_nn = neural_network(X_train, X_test, y_train)
+
+    print("Regresión logística en test:")
+    ev.evaluate(y_pred_lr, y_test)
+    print("Red neuronal en test:")
+    ev.evaluate(y_pred_nn, y_test)
+    print("Red neuronal profunda en test:")
 
     input('Pulsa Enter para cerrar el programa..')
 
