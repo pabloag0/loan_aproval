@@ -69,11 +69,10 @@ def main():
     print('Cargando datos...')
     df = pd.read_csv(directorio + "data/loan_data.csv")
 
-    X_train, X_test, y_train, y_test = pp.preprocess(df)
-    X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(df, lr=True)
+    X_train, X_test, y_train, y_test = pp.split(df)
 
     print("Regresión logística:")
-    val.cross_validate(X_train_lr, y_train_lr, logistic_regression, folds=5)
+    val.cross_validate(X_train, y_train, logistic_regression, folds=5, lr=True)
     
     print("Red neuronal:")
     val.cross_validate(X_train, y_train, neural_network, folds=5)
@@ -81,14 +80,21 @@ def main():
     print("Red neuronal profunda:")
     val.cross_validate(X_train, y_train, deep_neural_network, folds=5)
 
+    X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(X_train, X_test, y_train, y_test, lr=True)
+    X_train, X_test, y_train, y_test = pp.preprocess(X_train, X_test, y_train, y_test)
+
+
+
     # refit
     y_pred_lr = logistic_regression(X_train_lr, X_test_lr, y_train_lr)
     y_pred_nn = neural_network(X_train, X_test, y_train)
 
     print("Regresión logística en test:")
-    ev.evaluate(y_pred_lr, y_test_lr)
+    ev.evaluate(y_pred_lr, y_test)
     print("Red neuronal en test:")
     ev.evaluate(y_pred_nn, y_test)
+    print("Red neuronal profunda en test:")
+
     
 
     input('Pulsa Enter para cerrar el programa..')

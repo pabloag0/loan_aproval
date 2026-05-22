@@ -30,30 +30,6 @@ def compute_cost(X, y, w, b, lambda_=None):
 
     return total_cost
 
-"""
-def compute_gradient(X, y, w, b, lambda_=None):
-
-    m, n = X.shape
-    dj_dw = np.zeros(w.shape)
-    dj_db = 0.
-
-    for i in range(m):
-        z_wb = 0
-        for j in range(n):
-            z_wb_ij = X[i, j] * w[j]
-            z_wb += z_wb_ij
-        z_wb += b
-        f_wb = sigmoid(z_wb)
-        dj_db_i = f_wb - y[i]
-        dj_db += dj_db_i
-        for j in range(n):
-            dj_dw_ij = (f_wb - y[i]) * X[i][j]
-            dj_dw[j] += dj_dw_ij
-    dj_db /= m
-    dj_dw /= m
-
-    return dj_db, dj_dw
-"""
 
 def compute_gradient(X, y, w, b):
     m = X.shape[0]

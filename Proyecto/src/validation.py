@@ -2,11 +2,13 @@ import pandas as pd
 import numpy as np
 from src import evaluation as ev
 from sklearn.model_selection import StratifiedKFold
+from src import preprocess as pp
+
 
 ##############################################################################
 # CROSS VALIDATION
 
-def cross_validate(X, y, train, folds=5):
+def cross_validate(X, y, train, folds=5, lr=False):
     """Valida un modelo con Stratified K-Fold.
 
     La funcion train debe recibir X_train, X_val, y_train y devolver y_pred
@@ -33,6 +35,15 @@ def cross_validate(X, y, train, folds=5):
             y_array = np.asarray(y)
             y_train = y_array[train_idx]
             y_val = y_array[val_idx]
+
+
+        X_train, X_val, y_train, y_val = pp.preprocess(
+            X_train,
+            X_val,
+            y_train,
+            y_val,
+            lr=lr
+        )
 
         y_val = np.asarray(y_val).reshape(-1)
         y_pred = np.asarray(train(X_train, X_val, y_train)).reshape(-1)

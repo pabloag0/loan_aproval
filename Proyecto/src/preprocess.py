@@ -51,6 +51,7 @@ def handle_outliers(df):
     """Detecta y maneja outliers mediante IQR"""
     #numeric_cols = df.select_dtypes(include=[np.numbers]).columns
     df = df[df['person_age'] <= 100] # Gente de más de 100 años son excepciones
+    return df
     
 
 def normalize(X_train, X_test):
@@ -95,10 +96,10 @@ def erase_previous_defaults(X: pd.DataFrame, y: pd.DataFrame):
 
     return X, y
 
-
+"""
 def preprocess(df: pd.DataFrame, lr=False, balance=False, test_size=0.25, random_state=42):
-    """Funcion principal que llama a todas las anteriores en orden
-       y devuelve X_train, X_val, X_test, y_train, y_val, y_test"""
+    ""Funcion principal que llama a todas las anteriores en orden
+       y devuelve X_train, X_val, X_test, y_train, y_val, y_test""
     
     handle_outliers(df)
 
@@ -132,8 +133,42 @@ def preprocess(df: pd.DataFrame, lr=False, balance=False, test_size=0.25, random
     y_test = y_test.reshape(-1, 1)
 
     return X_train, X_test, y_train, y_test
+"""
+
+def preprocess(X_train, X_test, y_train, y_test, lr=False):
+    
+    # faltra filtrar por y tambien
+    # X_train = handle_outliers(X_train)
+    # X_test = handle_outliers(X_test)
+
+    X_train = encode_categoricals(X_train, defaults=True)
+    X_test = encode_categoricals(X_test, defaults=True)
+
+    X_train, X_test = normalize(X_train, X_test)
+
+    y_train = y_train.to_numpy()
+    y_test = y_test.to_numpy()
+
+    if lr:
+        return X_train, X_test, y_train.ravel(), y_test.ravel()
+    
+    X_train = X_train.to_numpy()
+    X_test = X_test.to_numpy()
+    y_train = y_train.reshape(-1, 1)
+    y_test = y_test.reshape(-1, 1)
+
+    return X_train, X_test, y_train, y_test
 
 
+
+    
+
+def split(df):
+    X = df.drop(columns=['loan_status'])
+    y = df['loan_status']
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2, stratify=y)
+    return X_train, X_test, y_train, y_test
 
 
 
