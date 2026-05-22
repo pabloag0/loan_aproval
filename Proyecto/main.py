@@ -37,23 +37,46 @@ def neural_network(X_train, X_test, y_train):
 
 def deep_neural_network(X_train, X_test, y_train, y_test):
     
-    dnn.ejecutar(X_train, X_test, y_train, y_test)
-    
-    pass
+    y_pred = dnn.ejecutar(X_train, X_test, y_train, y_test)
+
+    return y_pred
 
 def main():
     os.system('clear')
+    from src import validation as val
 
     print('Cargando datos...')
     df = pd.read_csv(directorio + "data/loan_data.csv")
 
-    print('Preprocesando datos...')
+    print('Preparando validación cruzada...')
+    X = df.drop(columns=['loan_status'])
+    y = df['loan_status']
+
+    def train_logistic_regression_fold(X_fold_train, X_fold_val, y_fold_train):
+        X_fold_train = pp.encode_categoricals(X_fold_train, defaults=True)
+        X_fold_val = pp.encode_categoricals(X_fold_val, defaults=True)
+
+        X_fold_val = X_fold_val.reindex(
+            columns=X_fold_train.columns,
+            fill_value=0
+        )
+
+        X_fold_train, X_fold_val = pp.normalize(X_fold_train, X_fold_val)
+        y_fold_train = np.asarray(y_fold_train).reshape(-1)
+
+        return logistic_regression(X_fold_train, X_fold_val, y_fold_train)
+
+    print('Validando regresión logística con Stratified K-Fold...')
+    val.cross_validate(X, y, train_logistic_regression_fold, folds=5)
+
+    print('Preprocesando datos para test final...')
     X_train, X_test, y_train, y_test = pp.preprocess(df, split=True, lr=True)
 
-    print('Entrenando regresión logística: ')
+    print('Entrenando regresión logística final: ')
     y_pred = logistic_regression(X_train, X_test, y_train)
 
-    ev.evaluate(X_test, y_pred, y_test)
+    print('Evaluación final en test:')
+    ev.evaluate(y_pred, y_test)
 
     #print('Entrenando red neuronal...')
     #y_pred = neural_network(X_train, X_test, y_train)

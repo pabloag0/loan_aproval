@@ -117,7 +117,7 @@ def preprocess(df: pd.DataFrame, split=True, lr=False, des=False, test_size=0.25
         else:
             return X, y.ravel()
     
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2, stratify=y)
 
     #X_train, y_train = erase_previous_defaults(X_train, y_train)
     X_train = encode_categoricals(X_train, defaults=True)

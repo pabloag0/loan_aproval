@@ -21,7 +21,7 @@ def predict(theta1, theta2, X):
     
     p = np.where(a3 > 0.5, 1, 0) # Salida de la clasificación binaria
 
-    return p
+    return p.reshape(-1)
 
 #############################################################################################
 # Entrenamiento
