@@ -38,7 +38,7 @@ def cross_validate(X, y, train, folds=5):
         y_pred = np.asarray(train(X_train, X_val, y_train)).reshape(-1)
 
         print(f"Fold {fold}")
-        metrics = ev.evaluate(y_pred, y_val)
+        metrics = ev.evaluate(y_pred, y_val, show_matrix=False)
         fold_metrics.append(metrics)
 
     summary = {}

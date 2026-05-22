@@ -103,8 +103,13 @@ def compute_gradient_reg(X, y, w, b, lambda_):
 #########################################################################
 # gradient descent
 #
-def train(X, y, w_in, b_in=0, alpha=0.01, num_iters=1000, lambda_=None):
+def train(X, y, w_in=None, b_in=0, alpha=0.01, num_iters=1000, lambda_=None):
+   
     m = len(X)
+
+    if w_in is None:
+        w_in = np.zeros(X.shape[1])
+
     if lambda_ is None:
         reg = False
     else:
@@ -131,7 +136,8 @@ def train(X, y, w_in, b_in=0, alpha=0.01, num_iters=1000, lambda_=None):
 
             J_history.append(cost)
         if i % math.ceil(num_iters / 10) == 0 or i == num_iters - 1:
-            print(f"Iteraticion {i:4d}: Cost {float(J_history[-1]):8.2f}   ")
+            #print(f"Iteraticion {i:4d}: Cost {float(J_history[-1]):8.2f}   ")
+            pass
 
 
     return w, b, J_history

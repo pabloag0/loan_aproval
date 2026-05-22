@@ -50,7 +50,6 @@ def encode_categoricals(df: pd.DataFrame, defaults=False):
 def handle_outliers(df):
     """Detecta y maneja outliers mediante IQR"""
     #numeric_cols = df.select_dtypes(include=[np.numbers]).columns
-
     df = df[df['person_age'] <= 100] # Gente de más de 100 años son excepciones
     
 
@@ -66,27 +65,27 @@ def normalize(X_train, X_test):
     return X_train_norm, X_test_norm
 
 # SUBMUESTREO PARA BALANCEAR CLASES
-def balance_by_loan_status(df: pd.DataFrame, random_state=42):
+def balance_by_loan_status(X, y, random_state=42):
 
-    # Recorta el dataset para dejar aprobados y no aprobados a partes iguales.
-    if 'loan_status' not in df.columns:
-        raise ValueError("El DataFrame debe contener la columna 'loan_status'.")
+    data = X.copy()
+    data["loan_status"] = y
 
-    approved = df[df['loan_status'] == 1]
-    rejected = df[df['loan_status'] == 0]
-
-    if approved.empty or rejected.empty:
-        raise ValueError("El DataFrame debe contener ejemplos de ambas clases.")
+    approved = data[data["loan_status"] == 1]
+    rejected = data[data["loan_status"] == 0]
 
     n_samples = min(len(approved), len(rejected))
 
-    approved_sample = approved.sample(n=n_samples, random_state=random_state)
-    rejected_sample = rejected.sample(n=n_samples, random_state=random_state)
+    balanced_data = pd.concat([
+        approved.sample(n=n_samples, random_state=random_state),
+        rejected.sample(n=n_samples, random_state=random_state)
+    ])
 
-    balanced_df = pd.concat([approved_sample, rejected_sample])
-    balanced_df = balanced_df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    balanced_data = balanced_data.sample(frac=1, random_state=random_state).reset_index(drop=True)
 
-    return balanced_df
+    X_balanced = balanced_data.drop(columns=["loan_status"])
+    y_balanced = balanced_data["loan_status"]
+
+    return X_balanced, y_balanced
 
 def erase_previous_defaults(X: pd.DataFrame, y: pd.DataFrame):
 
@@ -97,33 +96,25 @@ def erase_previous_defaults(X: pd.DataFrame, y: pd.DataFrame):
     return X, y
 
 
-def preprocess(df: pd.DataFrame, split=True, lr=False, des=False, test_size=0.25, random_state=42):
+def preprocess(df: pd.DataFrame, lr=False, balance=False, test_size=0.25, random_state=42):
     """Funcion principal que llama a todas las anteriores en orden
        y devuelve X_train, X_val, X_test, y_train, y_val, y_test"""
     
+    handle_outliers(df)
 
     X = df.drop(columns=['loan_status'])
     y = df['loan_status']
-
-    if not split:
-
-        X = X.to_numpy()
-        y = y.to_numpy().reshape(-1, 1)
-
-        X, _ = normalize(X, X)  # Normalizamos todo junto si no hay split
-
-        if not lr:
-            return X, y
-        else:
-            return X, y.ravel()
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2, stratify=y)
+
+    if balance:
+        X_train, y_train = balance_by_loan_status(X_train, y_train)
 
     #X_train, y_train = erase_previous_defaults(X_train, y_train)
     X_train = encode_categoricals(X_train, defaults=True)
     X_test = encode_categoricals(X_test, defaults=True)
 
-    sm = SMOTE(random_state=42)
+    sm = SMOTE(random_state=42) 
 
     X_train, X_test = normalize(X_train, X_test)
 
@@ -141,6 +132,49 @@ def preprocess(df: pd.DataFrame, split=True, lr=False, des=False, test_size=0.25
     y_test = y_test.reshape(-1, 1)
 
     return X_train, X_test, y_train, y_test
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def preprocess_kmeans(df: pd.DataFrame):
     """Preprocesado específico para clustering"""

@@ -13,6 +13,7 @@ from src.models import deep_neural_network as dnn
 from src import preprocess as pp
 from src import eda as eda
 from src import evaluation as ev
+from src import validation as val
 import matplotlib.pyplot as plt
 import os
 import time
@@ -21,25 +22,45 @@ directorio = '/Users/pabloag/uni/loan_aproval/Proyecto/'
 #directorio = 'D:/onedrive/OneDrive - Universidad Complutense de Madrid (UCM)/uni/3/2/AA/proyecto_git/loan_aproval/Proyecto/'
 
 
-def logistic_regression(X_train, X_test, y_train):
+def logistic_regression(X_train, X_val, y_train):
+    w, b, _ = lr.train(
+        X_train,
+        y_train,
+        np.zeros(X_train.shape[1]),
+        0,
+        alpha=0.1,
+        num_iters=300,
+        lambda_=1
+    )
 
-    w, b, j = lr.train(X_train, y_train, np.zeros(X_train.shape[1]), 0, alpha=0.1, num_iters=3000, lambda_=1)
-    y_pred = lr.predict(X_test, w, b)
+    y_pred = lr.predict(X_val, w, b)
 
     return y_pred
 
-def neural_network(X_train, X_test, y_train):
+
+def neural_network(X_train, X_val, y_train):
     
-    theta1, theta2 = nn.train(X_train, y_train, num_labels=1, alpha=0.1, num_iters=300, hidden_size=16 , reg=0, input_size=X_train.shape[1])
-    y_pred = nn.predict(theta1, theta2, X_test)
+    theta1, theta2 = nn.train(
+        X_train, 
+        y_train, 
+        num_labels=1, 
+        alpha=0.1, 
+        num_iters=300, 
+        hidden_size=16 , 
+        reg=0, 
+        input_size=X_train.shape[1])
+
+    y_pred = nn.predict(theta1, theta2, X_val)
 
     return y_pred
 
-def deep_neural_network(X_train, X_test, y_train, y_test):
+
+def deep_neural_network(X_train, X_val, y_train):
     
-    y_pred = dnn.ejecutar(X_train, X_test, y_train, y_test)
+    y_pred = dnn.ejecutar(X_train, X_val, y_train)
 
     return y_pred
+
 
 def main():
     os.system('clear')
@@ -48,40 +69,27 @@ def main():
     print('Cargando datos...')
     df = pd.read_csv(directorio + "data/loan_data.csv")
 
-    print('Preparando validación cruzada...')
-    X = df.drop(columns=['loan_status'])
-    y = df['loan_status']
+    X_train, X_test, y_train, y_test = pp.preprocess(df)
+    X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(df, lr=True)
 
-    def train_logistic_regression_fold(X_fold_train, X_fold_val, y_fold_train):
-        X_fold_train = pp.encode_categoricals(X_fold_train, defaults=True)
-        X_fold_val = pp.encode_categoricals(X_fold_val, defaults=True)
+    print("Regresión logística:")
+    val.cross_validate(X_train_lr, y_train_lr, logistic_regression, folds=5)
+    
+    print("Red neuronal:")
+    val.cross_validate(X_train, y_train, neural_network, folds=5)
+    
+    print("Red neuronal profunda:")
+    val.cross_validate(X_train, y_train, deep_neural_network, folds=5)
 
-        X_fold_val = X_fold_val.reindex(
-            columns=X_fold_train.columns,
-            fill_value=0
-        )
+    # refit
+    y_pred_lr = logistic_regression(X_train_lr, X_test_lr, y_train_lr)
+    y_pred_nn = neural_network(X_train, X_test, y_train)
 
-        X_fold_train, X_fold_val = pp.normalize(X_fold_train, X_fold_val)
-        y_fold_train = np.asarray(y_fold_train).reshape(-1)
-
-        return logistic_regression(X_fold_train, X_fold_val, y_fold_train)
-
-    print('Validando regresión logística con Stratified K-Fold...')
-    val.cross_validate(X, y, train_logistic_regression_fold, folds=5)
-
-    print('Preprocesando datos para test final...')
-    X_train, X_test, y_train, y_test = pp.preprocess(df, split=True, lr=True)
-
-    print('Entrenando regresión logística final: ')
-    y_pred = logistic_regression(X_train, X_test, y_train)
-
-    print('Evaluación final en test:')
-    ev.evaluate(y_pred, y_test)
-
-    #print('Entrenando red neuronal...')
-    #y_pred = neural_network(X_train, X_test, y_train)
-
-
+    print("Regresión logística en test:")
+    ev.evaluate(y_pred_lr, y_test_lr)
+    print("Red neuronal en test:")
+    ev.evaluate(y_pred_nn, y_test)
+    
 
     input('Pulsa Enter para cerrar el programa..')
 
