@@ -6,20 +6,22 @@ import torch.nn as nn
 class DeepNeuralNetwork(nn.Module):
     """Red neuronal sencilla para clasificacion binaria."""
 
-    def __init__(self, input_size, hidden_size=16):
+    def __init__(self, input_size):
         super().__init__()
 
-        self.capa_entrada = nn.Linear(input_size, hidden_size)
-        self.activacion = nn.ReLU()
-        self.capa_salida = nn.Linear(hidden_size, 1)
-        self.sigmoid = nn.Sigmoid()
+        self.red = nn.Sequential(
+            nn.Linear(input_size, 32),
+            nn.ReLU(),
+            nn.Linear(32, 16),
+            nn.ReLU(),
+            nn.Linear(16, 8),
+            nn.ReLU(),
+            nn.Linear(8, 1),
+            nn.Sigmoid()
+        )
 
     def forward(self, x):
-        x = self.capa_entrada(x)
-        x = self.activacion(x)
-        x = self.capa_salida(x)
-        x = self.sigmoid(x)
-        return x
+        return self.red(x)
 
 
 def _convertir_a_tensores(X, y):
@@ -33,21 +35,25 @@ def ejecutar(X_train, X_test, y_train, y_test=None, seed=42):
     """Entrena una red neuronal basica y devuelve predicciones sobre test."""
 
     torch.manual_seed(seed)
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
     X_train_tensor, y_train_tensor = _convertir_a_tensores(X_train, y_train)
     X_test_tensor = torch.tensor(np.asarray(X_test), dtype=torch.float32)
+    X_train_tensor = X_train_tensor.to(device)
+    y_train_tensor = y_train_tensor.to(device)
+    X_test_tensor = X_test_tensor.to(device)
 
     input_size = X_train_tensor.shape[1]
-    model = DeepNeuralNetwork(input_size=input_size, hidden_size=16)
+    model = DeepNeuralNetwork(input_size=input_size).to(device)
 
     loss_function = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     epochs = 100
 
-    print("Entrenando red neuronal sencilla con PyTorch...")
-    print(f"Entradas: {input_size}")
-    print("Arquitectura: entrada -> 16 neuronas -> salida")
+    #print("Entrenando red neuronal sencilla con PyTorch...")
+    #print(f"Entradas: {input_size}")
+    #print("Arquitectura: entrada -> 32 neuronas -> 16 neuronas -> 8 neuronas -> salida")
 
     for epoch in range(epochs):
         model.train()
@@ -60,11 +66,12 @@ def ejecutar(X_train, X_test, y_train, y_test=None, seed=42):
         optimizer.step()
 
         if epoch % 20 == 0 or epoch == epochs - 1:
-            print(f"Epoca {epoch + 1:3d}/{epochs}: loss = {loss.item():.4f}")
+            #print(f"Epoca {epoch + 1:3d}/{epochs}: loss = {loss.item():.4f}")
+            pass
 
     model.eval()
     with torch.no_grad():
         probabilities = model(X_test_tensor)
-        y_pred = (probabilities >= 0.5).int().numpy().reshape(-1)
+        y_pred = (probabilities >= 0.5).int().cpu().numpy().reshape(-1)
 
     return y_pred

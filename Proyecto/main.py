@@ -29,7 +29,7 @@ def logistic_regression(X_train, X_val, y_train):
         np.zeros(X_train.shape[1]),
         0,
         alpha=0.1,
-        num_iters=300,
+        num_iters=3000,
         lambda_=1
     )
 
@@ -45,8 +45,8 @@ def neural_network(X_train, X_val, y_train):
         y_train, 
         num_labels=1, 
         alpha=0.1, 
-        num_iters=300, 
-        hidden_size=16 , 
+        num_iters=3000, 
+        hidden_size=16, 
         reg=0, 
         input_size=X_train.shape[1])
 
@@ -88,9 +88,9 @@ def main():
     y_pred_nn = neural_network(X_train, X_test, y_train)
 
     print("Regresión logística en test:")
-    ev.evaluate(y_pred_lr, y_test)
+    ev.evaluate(y_pred_lr, y_test, mostrar=True)
     print("Red neuronal en test:")
-    ev.evaluate(y_pred_nn, y_test)
+    ev.evaluate(y_pred_nn, y_test, mostrar=True)
     print("Red neuronal profunda en test:")
 
 
@@ -114,9 +114,9 @@ def main():
     y_pred_nn = neural_network(X_train, X_test, y_train)
 
     print("Regresión logística en test:")
-    ev.evaluate(y_pred_lr, y_test)
+    ev.evaluate(y_pred_lr, y_test, mostrar=True)
     print("Red neuronal en test:")
-    ev.evaluate(y_pred_nn, y_test)
+    ev.evaluate(y_pred_nn, y_test, mostrar=True)
     print("Red neuronal profunda en test:")
 
     input('Pulsa Enter para cerrar el programa..')

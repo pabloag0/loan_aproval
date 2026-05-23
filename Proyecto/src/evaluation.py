@@ -7,17 +7,18 @@ from src import preprocess as pp
 
 
 
-def evaluate(y_pred, y_test, show_matrix=True):
+def evaluate(y_pred, y_test, mostrar=False, show_matrix=False):
 
     accuracy = accuracy_score(y_test, y_pred) * 100
     precision = precision_score(y_test, y_pred) * 100
     recall = recall_score(y_test, y_pred) * 100
     f1 = f1_score(y_test, y_pred) * 100
 
-    print(f"Acuraccy: {accuracy}%")
-    print(f"Precision: {precision}%")
-    print(f"Recall: {recall}%")
-    print(f"F1: {f1}%")
+    if mostrar:
+        print(f"Acuraccy: {accuracy}%")
+        print(f"Precision: {precision}%")
+        print(f"Recall: {recall}%")
+        print(f"F1: {f1}%")
 
     #Confusion matrix (label)
     if show_matrix:
