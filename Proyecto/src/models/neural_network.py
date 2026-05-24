@@ -92,9 +92,12 @@ def train(X, y, input_size, hidden_size, num_labels, reg, alpha, num_iters=2500)
 
     theta1 = (np.random.rand(hidden_size, (input_size + 1)) - 0.5) * 0.25
     theta2 = (np.random.rand(num_labels, (hidden_size + 1)) - 0.5) * 0.25
+    J_history = []
 
     for i in range(num_iters):
         (J, grad1, grad2) = backprop(theta1, theta2, X, y, reg)
+        J_history.append(J)
         theta1 = theta1 - alpha * grad1
         theta2 = theta2 - alpha * grad2
-    return theta1, theta2
+
+    return theta1, theta2, J_history

@@ -31,18 +31,15 @@ def handle_nulls(df):
     no tiene valores nulos"""
     pass
 
-def encode_categoricals(df: pd.DataFrame, defaults=False):
+def encode_categoricals(df: pd.DataFrame):
     """Convierte columnas de texto a nÃºmeros (label encoding o one-hot)"""
     categorical_cols = [
         "person_gender",
         "person_education",
         "person_home_ownership",
-        "loan_intent"
+        "loan_intent",
+        "previous_loan_defaults_on_file"
     ]
-
-    if defaults:
-        categorical_cols.append("previous_loan_defaults_on_file")
-
     df = pd.get_dummies(df, columns=categorical_cols, drop_first=True, dtype=int)
 
     return df
@@ -96,45 +93,6 @@ def erase_previous_defaults(X: pd.DataFrame, y: pd.DataFrame):
 
     return X, y
 
-"""
-def preprocess(df: pd.DataFrame, lr=False, balance=False, test_size=0.25, random_state=42):
-    ""Funcion principal que llama a todas las anteriores en orden
-       y devuelve X_train, X_val, X_test, y_train, y_val, y_test""
-    
-    handle_outliers(df)
-
-    X = df.drop(columns=['loan_status'])
-    y = df['loan_status']
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2, stratify=y)
-
-    if balance:
-        X_train, y_train = balance_by_loan_status(X_train, y_train)
-
-    #X_train, y_train = erase_previous_defaults(X_train, y_train)
-    X_train = encode_categoricals(X_train, defaults=True)
-    X_test = encode_categoricals(X_test, defaults=True)
-
-    sm = SMOTE(random_state=42) 
-
-    X_train, X_test = normalize(X_train, X_test)
-
-    #X_train, y_train = sm.fit_resample(X_train, y_train)
-
-    y_train = y_train.to_numpy()
-    y_test = y_test.to_numpy()
-
-    if lr:
-        return X_train, X_test, y_train.ravel(), y_test.ravel()
-    
-    X_train = X_train.to_numpy()
-    X_test = X_test.to_numpy()
-    y_train = y_train.reshape(-1, 1)
-    y_test = y_test.reshape(-1, 1)
-
-    return X_train, X_test, y_train, y_test
-"""
-
 def preprocess(X_train, X_test, y_train, y_test, lr=False, balance=False):
     
     # faltra filtrar por y tambien
@@ -145,8 +103,8 @@ def preprocess(X_train, X_test, y_train, y_test, lr=False, balance=False):
         X_train, y_train = balance_by_loan_status(X_train, y_train)
 
 
-    X_train = encode_categoricals(X_train, defaults=True)
-    X_test = encode_categoricals(X_test, defaults=True)
+    X_train = encode_categoricals(X_train)
+    X_test = encode_categoricals(X_test)
 
     X_train, X_test = normalize(X_train, X_test)
 
@@ -163,10 +121,6 @@ def preprocess(X_train, X_test, y_train, y_test, lr=False, balance=False):
 
     return X_train, X_test, y_train, y_test
 
-
-
-    
-
 def split(df):
     X = df.drop(columns=['loan_status'])
     y = df['loan_status']
@@ -174,79 +128,3 @@ def split(df):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2, stratify=y)
     return X_train, X_test, y_train, y_test
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def preprocess_kmeans(df: pd.DataFrame):
-    """Preprocesado específico para clustering"""
-    # Aquí podríamos hacer un preprocesado específico para clustering, como escalar las características, eliminar outliers, etc.
-
-    if check_nulls(df):
-        handle_nulls(df)
-    
-    df = encode_categoricals(df)
-
-    handle_outliers(df)
-
-    X = df.drop(columns=['loan_status'])
-    
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    return X_scaled, X.columns, scaler
-
-"""
-# PREPROCESADO PARA REGRESIÓN LOGÍSTICA
-def preprocess_lr(df, split=False, test_size=0.25, random_state=42):
-    ""Preprocesa los datos para regresion logistica.""
-    if not split:
-        X, y = preprocess(df, split=split, test_size=test_size, random_state=random_state)
-        return X, y.ravel()
-
-    X_train, X_test, Y_train, Y_test = preprocess(
-        df,
-        split=split,
-        test_size=test_size,
-        random_state=random_state
-    )
-
-    return X_train, X_test, Y_train.ravel(), Y_test.ravel()
-"""

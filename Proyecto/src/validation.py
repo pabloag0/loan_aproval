@@ -71,7 +71,3 @@ def cross_validate(X, y, train, folds=5, lr=False, balance=False):
         )
 
     return summary
-
-# Dijo en clase que sería interesante implementarlo (mas nota)
-def gridsearch():
-    pass

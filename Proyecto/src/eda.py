@@ -72,7 +72,7 @@ def show_dataset_info(df, plot=False):
             'Loan Status': status,
         }
 
-        save_dir = 'C:/Users/pablo/OneDrive - Universidad Complutense de Madrid (UCM)/Uni/3º/2º/AA/workspace/Proyecto/results/figures/eda/'
+        save_dir = '/results/figures/eda/'
         os.makedirs(save_dir, exist_ok=True)
 
         # --- Figura 1: todas las distribuciones individuales ---
@@ -117,12 +117,6 @@ def show_dataset_info(df, plot=False):
         plt.savefig(os.path.join(save_dir, 'gender_vs_loan_status.png'), dpi=150, bbox_inches='tight')
         plt.show()
         plt.close(fig)
-
-# CLUSTERING
-def kmeans(X):
-    model = KMeans(n_clusters=10, random_state=42, n_init=10)
-    clusters = model.fit_predict(X)
-    return model, clusters
 
 def impagos(df):
 

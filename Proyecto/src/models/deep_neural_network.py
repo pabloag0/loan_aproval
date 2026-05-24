@@ -31,17 +31,14 @@ def _convertir_a_tensores(X, y):
     return X_tensor, y_tensor
 
 
-def ejecutar(X_train, X_test, y_train, y_test=None, seed=42):
-    """Entrena una red neuronal basica y devuelve predicciones sobre test."""
-
+def entrenar(X_train, y_train, seed=42):
+    """Entrena la red neuronal y devuelve el modelo entrenado."""
     torch.manual_seed(seed)
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
     X_train_tensor, y_train_tensor = _convertir_a_tensores(X_train, y_train)
-    X_test_tensor = torch.tensor(np.asarray(X_test), dtype=torch.float32)
     X_train_tensor = X_train_tensor.to(device)
     y_train_tensor = y_train_tensor.to(device)
-    X_test_tensor = X_test_tensor.to(device)
 
     input_size = X_train_tensor.shape[1]
     model = DeepNeuralNetwork(input_size=input_size).to(device)
@@ -49,7 +46,7 @@ def ejecutar(X_train, X_test, y_train, y_test=None, seed=42):
     loss_function = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    epochs = 100
+    epochs = 3000
 
     #print("Entrenando red neuronal sencilla con PyTorch...")
     #print(f"Entradas: {input_size}")
@@ -69,9 +66,29 @@ def ejecutar(X_train, X_test, y_train, y_test=None, seed=42):
             #print(f"Epoca {epoch + 1:3d}/{epochs}: loss = {loss.item():.4f}")
             pass
 
+    return model
+
+
+def predecir(model, X_test):
+    """Devuelve predicciones usando un modelo ya entrenado."""
+    device = next(model.parameters()).device
+    X_test_tensor = torch.tensor(np.asarray(X_test), dtype=torch.float32).to(device)
+
     model.eval()
     with torch.no_grad():
         probabilities = model(X_test_tensor)
         y_pred = (probabilities >= 0.5).int().cpu().numpy().reshape(-1)
+
+    return y_pred
+
+
+def ejecutar(X_train, X_test, y_train, seed=42, return_model=False):
+    """Entrena una red neuronal basica y devuelve predicciones sobre test."""
+
+    model = entrenar(X_train, y_train, seed=seed)
+    y_pred = predecir(model, X_test)
+
+    if return_model:
+        return y_pred, model
 
     return y_pred

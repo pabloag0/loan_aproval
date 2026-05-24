@@ -14,13 +14,11 @@ from src import preprocess as pp
 from src import eda as eda
 from src import evaluation as ev
 from src import validation as val
+from src import learning_curves as lc
 import matplotlib.pyplot as plt
 import os
-import time
 
 directorio = '/Users/pabloag/uni/loan_aproval/Proyecto/'
-#directorio = 'D:/onedrive/OneDrive - Universidad Complutense de Madrid (UCM)/uni/3/2/AA/proyecto_git/loan_aproval/Proyecto/'
-
 
 def logistic_regression(X_train, X_val, y_train):
     w, b, _ = lr.train(
@@ -29,7 +27,7 @@ def logistic_regression(X_train, X_val, y_train):
         np.zeros(X_train.shape[1]),
         0,
         alpha=0.1,
-        num_iters=3000,
+        num_iters=1200,
         lambda_=1
     )
 
@@ -40,12 +38,12 @@ def logistic_regression(X_train, X_val, y_train):
 
 def neural_network(X_train, X_val, y_train):
     
-    theta1, theta2 = nn.train(
+    theta1, theta2, _ = nn.train(
         X_train, 
         y_train, 
         num_labels=1, 
         alpha=0.1, 
-        num_iters=3000, 
+        num_iters=1200, 
         hidden_size=16, 
         reg=0, 
         input_size=X_train.shape[1])
@@ -57,68 +55,171 @@ def neural_network(X_train, X_val, y_train):
 
 def deep_neural_network(X_train, X_val, y_train):
     
-    y_pred = dnn.ejecutar(X_train, X_val, y_train)
+    model = dnn.entrenar(X_train, y_train)
+    y_pred = dnn.predecir(model, X_val)
 
     return y_pred
 
 
 def main():
     os.system('clear')
-    from src import validation as val
 
-    print('Cargando datos...')
+    print("\nPROYECTO DE CLASIFICACION DE PRESTAMOS")
+    print("---------------------------------------")
+    print("\n1. CARGA DE DATOS")
+    print("Cargando datos...")
     df = pd.read_csv(directorio + "data/loan_data.csv")
+    print(f"Dataset cargado: {df.shape[0]} filas, {df.shape[1]} columnas")
 
+    ejecutar_eda = input("Quieres ejecutar el EDA? (s/n): ").strip().lower()
+    if ejecutar_eda == "s":
+        print("\n2. ANALISIS EXPLORATORIO DE DATOS")
+        eda.show_dataset_info(df, plot=False)
+        eda.impagos(df)
+    else:
+        print("EDA omitido.")
+
+    print("\n3. SPLIT TRAIN / TEST")
     X_train, X_test, y_train, y_test = pp.split(df)
+    print(f"Train: {X_train.shape[0]} ejemplos")
+    print(f"Test : {X_test.shape[0]} ejemplos")
 
-    print("Regresión logística:")
+    print("\n4. CURVAS")
+    X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+        lr=True
+    )
+    X_train_nn, X_test_nn, y_train_nn, y_test_nn = pp.preprocess(
+        X_train,
+        X_test,
+        y_train,
+        y_test
+    )
+
+    print("Generando curva de entrenamiento de regresion logistica...")
+    _, _, J_history_lr = lr.train(
+        X_train_lr,
+        y_train_lr,
+        np.zeros(X_train_lr.shape[1]),
+        0,
+        alpha=0.1,
+        num_iters=3000,
+        lambda_=1
+    )
+
+    print("Generando curva de entrenamiento de red neuronal...")
+    _, _, J_history_nn = nn.train(
+        X_train_nn,
+        y_train_nn,
+        num_labels=1,
+        alpha=0.1,
+        num_iters=3000,
+        hidden_size=16,
+        reg=0,
+        input_size=X_train_nn.shape[1]
+    )
+
+    lc.plot_training_curve(J_history_lr, "Curva de entrenamiento - Regresion logistica")
+    lc.plot_training_curve(J_history_nn, "Curva de entrenamiento - Red neuronal")
+
+    print("Generando learning curve de regresion logistica...")
+    lc.learning_curve_cv(
+        X_train,
+        y_train,
+        logistic_regression,
+        folds=2,
+        lr=True,
+        title="Learning curve - Regresion logistica"
+    )
+
+    print("Generando learning curve de red neuronal...")
+    lc.learning_curve_cv(
+        X_train,
+        y_train,
+        neural_network,
+        folds=2,
+        title="Learning curve - Red neuronal"
+    )
+
+    print("Generando curva de validacion de la red neuronal...")
+    lc.validation_curve_cv(
+        X_train,
+        y_train,
+        hidden_sizes=[2, 4, 8, 16, 32],
+        folds=3,
+        num_iters=1200
+    )
+
+    print("\n5. VALIDACION CRUZADA SIN BALANCEO")
+    print("Regresion logistica:")
     val.cross_validate(X_train, y_train, logistic_regression, folds=5, lr=True)
-    
+
     print("Red neuronal:")
     val.cross_validate(X_train, y_train, neural_network, folds=5)
-    
+
     print("Red neuronal profunda:")
     val.cross_validate(X_train, y_train, deep_neural_network, folds=5)
 
-    X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(X_train, X_test, y_train, y_test, lr=True)
-    X_train, X_test, y_train, y_test = pp.preprocess(X_train, X_test, y_train, y_test)
-
-    # refit
+    print("\n6. TEST SIN BALANCEO")
     y_pred_lr = logistic_regression(X_train_lr, X_test_lr, y_train_lr)
-    y_pred_nn = neural_network(X_train, X_test, y_train)
+    y_pred_nn = neural_network(X_train_nn, X_test_nn, y_train_nn)
+    y_pred_dnn = deep_neural_network(X_train_nn, X_test_nn, y_train_nn)
 
-    print("Regresión logística en test:")
-    ev.evaluate(y_pred_lr, y_test, mostrar=True)
-    print("Red neuronal en test:")
-    ev.evaluate(y_pred_nn, y_test, mostrar=True)
-    print("Red neuronal profunda en test:")
+    print("Regresion logistica:")
+    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True)
 
+    print("Red neuronal:")
+    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True)
 
-    print("Ahora corrigiendo el desbalanceo con submuestreo: ")
+    print("Red neuronal profunda:")
+    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True)
+
+    print("\n7. VALIDACION CRUZADA CON BALANCEO")
     X_train, X_test, y_train, y_test = pp.split(df)
 
-    print("Regresión logística:")
+    print("Regresion logistica:")
     val.cross_validate(X_train, y_train, logistic_regression, folds=5, lr=True, balance=True)
-    
+
     print("Red neuronal:")
     val.cross_validate(X_train, y_train, neural_network, folds=5, balance=True)
-    
+
     print("Red neuronal profunda:")
     val.cross_validate(X_train, y_train, deep_neural_network, folds=5, balance=True)
 
-    X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(X_train, X_test, y_train, y_test, lr=True, balance=True)
-    X_train, X_test, y_train, y_test = pp.preprocess(X_train, X_test, y_train, y_test, balance=True)
+    print("\n8. TEST CON BALANCEO")
+    X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+        lr=True,
+        balance=True
+    )
+    X_train_nn, X_test_nn, y_train_nn, y_test_nn = pp.preprocess(
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+        balance=True
+    )
 
-    # refit
     y_pred_lr = logistic_regression(X_train_lr, X_test_lr, y_train_lr)
-    y_pred_nn = neural_network(X_train, X_test, y_train)
+    y_pred_nn = neural_network(X_train_nn, X_test_nn, y_train_nn)
+    y_pred_dnn = deep_neural_network(X_train_nn, X_test_nn, y_train_nn)
 
-    print("Regresión logística en test:")
-    ev.evaluate(y_pred_lr, y_test, mostrar=True)
-    print("Red neuronal en test:")
-    ev.evaluate(y_pred_nn, y_test, mostrar=True)
-    print("Red neuronal profunda en test:")
+    print("Regresion logistica:")
+    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True)
 
+    print("Red neuronal:")
+    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True)
+
+    print("Red neuronal profunda:")
+    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True)
+
+    print("\nFIN")
     input('Pulsa Enter para cerrar el programa..')
 
 main()
