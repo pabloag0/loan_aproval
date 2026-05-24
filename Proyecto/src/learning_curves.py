@@ -10,7 +10,7 @@ from src.models import neural_network as nn
 
 def get_curves_dir():
     project_dir = os.path.dirname(os.path.dirname(__file__))
-    save_dir = os.path.join(project_dir, "results", "figures", "curves")
+    save_dir = os.path.join(project_dir, "results", "curves")
     os.makedirs(save_dir, exist_ok=True)
     return save_dir
 

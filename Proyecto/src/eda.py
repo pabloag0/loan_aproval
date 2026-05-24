@@ -71,7 +71,7 @@ def show_dataset_info(df, plot=False):
         }
 
         project_dir = os.path.dirname(os.path.dirname(__file__))
-        save_dir = os.path.join(project_dir, 'results', 'figures', 'eda')
+        save_dir = os.path.join(project_dir, 'results', 'eda')
         os.makedirs(save_dir, exist_ok=True)
 
         # --- Figura 1: todas las distribuciones individuales ---
@@ -139,6 +139,36 @@ def impagos(df):
 
     print('Precision sin impago')
     print(pago)
+
+
+def check_defaults(df):
+    """Genera una figura relacionando defaults previos con loan_status."""
+    project_dir = os.path.dirname(os.path.dirname(__file__))
+    save_dir = os.path.join(project_dir, 'results', 'eda')
+    os.makedirs(save_dir, exist_ok=True)
+
+    table = pd.crosstab(
+        df["previous_loan_defaults_on_file"],
+        df["loan_status"],
+        normalize="index"
+    ) * 100
+
+    table = table.rename(columns={0: "Label 0", 1: "Label 1"})
+
+    ax = table.plot(kind="bar", figsize=(8, 5), color=["#2E74B5", "#C0504D"])
+    ax.set_title("Defaults previos vs etiqueta")
+    ax.set_xlabel("Previous loan defaults on file")
+    ax.set_ylabel("Porcentaje")
+    ax.set_ylim(0, 100)
+    ax.tick_params(axis="x", rotation=0)
+    ax.legend(title="loan_status")
+
+    for container in ax.containers:
+        ax.bar_label(container, fmt="%.1f%%")
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, "defaults_vs_label.png"), dpi=150, bbox_inches="tight")
+    plt.close()
 
 
 def outliers(df):

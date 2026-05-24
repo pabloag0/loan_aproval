@@ -29,7 +29,9 @@ Proyecto/
 │       ├── neural_network.py
 │       └── deep_neural_network.py
 ├── results/
-│   └── figures/
+│   ├── curves/
+│   ├── eda/
+│   └── preprocessing/
 └── report/
 ```
 
@@ -53,8 +55,14 @@ Ademas, se incluyen:
 - Division train/test estratificada.
 - Validacion cruzada estratificada.
 - Evaluacion con accuracy, precision, recall y F1.
-- Comparacion con y sin balanceo de clases.
+- Comparacion sin balanceo, con undersampling y con oversampling mediante SMOTE.
 - Curvas de entrenamiento, learning curves y validation curves.
+
+Las imagenes generadas por el proyecto se guardan en `Proyecto/results/`:
+
+- `Proyecto/results/eda/`: graficas del analisis exploratorio.
+- `Proyecto/results/curves/`: curvas de entrenamiento, learning curves y validation curves.
+- `Proyecto/results/preprocessing/`: espacio reservado para graficas o salidas de preprocesado.
 
 ## Instalacion del entorno
 
@@ -97,7 +105,7 @@ CPU.
 
 ## Ejecucion
 
-Desde la carpeta del proyecto:
+Desde la raiz del repositorio:
 
 ```bash
 python Proyecto/main.py
@@ -133,8 +141,10 @@ El programa ejecuta el flujo principal en este orden:
 4. Generacion opcional de curvas.
 5. Validacion cruzada sin balanceo.
 6. Evaluacion final en test sin balanceo.
-7. Validacion cruzada con balanceo.
-8. Evaluacion final en test con balanceo.
+7. Validacion cruzada con undersampling.
+8. Evaluacion final en test con undersampling.
+9. Validacion cruzada con oversampling mediante SMOTE.
+10. Evaluacion final en test con oversampling mediante SMOTE.
 
 ## Limpieza de outliers
 
@@ -154,6 +164,21 @@ estratificada resultante es:
 La limpieza es conservadora: no se eliminan todos los outliers estadisticos,
 solo valores extremos poco plausibles.
 
+## Balanceo de clases
+
+El proyecto compara tres escenarios:
+
+- Sin balanceo: se conserva la distribucion original de clases.
+- Undersampling: se reduce la clase mayoritaria solo en train.
+- Oversampling con SMOTE: se generan ejemplos sinteticos de la clase minoritaria solo en train.
+
+En validacion cruzada, tanto el undersampling como SMOTE se aplican dentro de
+cada fold, despues de separar train y validacion. Esto evita usar informacion
+del fold de validacion o del conjunto de test durante el balanceo.
+
+SMOTE se implementa con `imbalanced-learn`, por eso esta libreria aparece en
+`requirements.txt`.
+
 ## Reproducibilidad
 
 El dataset necesario se incluye en:
@@ -167,3 +192,8 @@ principal desde `Proyecto/main.py`. Para reproducir tambien las graficas,
 responder `s` cuando el programa pregunte si se quieren generar las curvas.
 Algunas partes, como el entrenamiento de redes neuronales y la generacion de
 curvas, pueden tardar varios minutos dependiendo del ordenador.
+
+Los resultados pueden presentar pequeñas variaciones en la red profunda si se
+ejecuta con aceleracion GPU/MPS de PyTorch, aunque las semillas y
+`random_state=42` estan fijados en las divisiones, validacion cruzada,
+undersampling y SMOTE.

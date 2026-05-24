@@ -27,7 +27,6 @@ def handle_nulls(df):
 def encode_categoricals(df: pd.DataFrame):
     """Convierte columnas de texto a nÃºmeros (label encoding o one-hot)"""
     categorical_cols = [
-        "person_gender",
         "person_education",
         "person_home_ownership",
         "loan_intent",
@@ -44,7 +43,11 @@ def handle_outliers(df):
         (df["person_emp_exp"] <= 60) &
         (df["person_income"] <= 1_000_000)
     ]
-    
+
+def remove_sensitive_features(df):
+    df = df.drop(columns=['person_gender'])
+    return df
+
 
 def normalize(X_train, X_test):
     """Normaliza con z-score usando solo estadisticos de train"""
@@ -92,6 +95,8 @@ def preprocess(X_train, X_test, y_train, y_test, lr=False, undersampling=False, 
     X_train = encode_categoricals(X_train)
     X_test = encode_categoricals(X_test)
 
+    X_test = X_test.reindex(columns=X_train.columns, fill_value=0)
+
     X_train, X_test = normalize(X_train, X_test)
 
     if oversampling:
@@ -112,6 +117,7 @@ def preprocess(X_train, X_test, y_train, y_test, lr=False, undersampling=False, 
     return X_train, X_test, y_train, y_test
 
 def split(df):
+    df = remove_sensitive_features(df)
     df = handle_outliers(df)
 
     X = df.drop(columns=['loan_status'])

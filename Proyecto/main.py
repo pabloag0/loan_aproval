@@ -68,6 +68,7 @@ def main():
         print("\n2. ANALISIS EXPLORATORIO DE DATOS")
         eda.show_dataset_info(df, plot=False)
         eda.impagos(df)
+        eda.check_defaults(df)
         eda.outliers(df)
     else:
         print("EDA omitido.")
@@ -166,13 +167,13 @@ def main():
     y_pred_dnn = deep_neural_network(X_train_nn, X_test_nn, y_train_nn)
 
     print("Regresion logistica:")
-    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True)
+    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True, show_matrix=True)
 
     print("Red neuronal:")
-    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True)
+    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True, show_matrix=True)
 
     print("Red neuronal profunda:")
-    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True)
+    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True, show_matrix=True)
 
     print("\n7. VALIDACION CRUZADA CON UNDERSAMPLING")
     X_train, X_test, y_train, y_test = pp.split(df)
@@ -208,13 +209,13 @@ def main():
     y_pred_dnn = deep_neural_network(X_train_nn, X_test_nn, y_train_nn)
 
     print("Regresion logistica:")
-    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True)
+    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True, show_matrix=True)
 
     print("Red neuronal:")
-    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True)
+    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True, show_matrix=True)
 
     print("Red neuronal profunda:")
-    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True)
+    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True, show_matrix=True)
 
     print("\n9. VALIDACION CRUZADA CON OVERSAMPLING")
     X_train, X_test, y_train, y_test = pp.split(df)
@@ -250,13 +251,13 @@ def main():
     y_pred_dnn = deep_neural_network(X_train_nn, X_test_nn, y_train_nn)
 
     print("Regresion logistica:")
-    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True)
+    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True, show_matrix=True)
 
     print("Red neuronal:")
-    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True)
+    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True, show_matrix=True)
 
     print("Red neuronal profunda:")
-    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True)
+    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True, show_matrix=True)
 
     print("\nFIN")
     input('Pulsa Enter para cerrar el programa..')
