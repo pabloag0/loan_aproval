@@ -4,13 +4,6 @@ from imblearn.over_sampling import SMOTE
 import pandas as pd
 import numpy as np
 
-# Hay que quitar la fila del genero, no aporta valor predictivo
-# Hay que cambiar las categori­as por numeros, one-hot encoding
-# Hay que separar el nuevo dataset, en train y test y validation
-# Hay que compensar el desbalanceo (submuestreo o sobremuestreo)
-# Hay que valorar/eliminar outliers
-
-# Feature engineering
 def check_nulls(df):
     """Detecta y muestra valores nulos"""
     null_counts = df.isnull().sum()
@@ -45,10 +38,12 @@ def encode_categoricals(df: pd.DataFrame):
     return df
 
 def handle_outliers(df):
-    """Detecta y maneja outliers mediante IQR"""
-    #numeric_cols = df.select_dtypes(include=[np.numbers]).columns
-    df = df[df['person_age'] <= 100] # Gente de más de 100 años son excepciones
-    return df
+    """Elimina valores claramente sospechosos."""
+    return df[
+        (df["person_age"] <= 100) &
+        (df["person_emp_exp"] <= 60) &
+        (df["person_income"] <= 1_000_000)
+    ]
     
 
 def normalize(X_train, X_test):
@@ -85,14 +80,6 @@ def balance_by_loan_status(X, y, random_state=42):
 
     return X_balanced, y_balanced
 
-def erase_previous_defaults(X: pd.DataFrame, y: pd.DataFrame):
-
-    mask_no_defaults = X["previous_loan_defaults_on_file"] == "No"
-    X = X[mask_no_defaults]
-    y = y[mask_no_defaults]
-
-    return X, y
-
 def preprocess(X_train, X_test, y_train, y_test, lr=False, balance=False):
     
     # faltra filtrar por y tambien
@@ -122,6 +109,8 @@ def preprocess(X_train, X_test, y_train, y_test, lr=False, balance=False):
     return X_train, X_test, y_train, y_test
 
 def split(df):
+    df = handle_outliers(df)
+
     X = df.drop(columns=['loan_status'])
     y = df['loan_status']
     

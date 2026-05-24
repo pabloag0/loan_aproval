@@ -1,10 +1,3 @@
-# debe ser el programa principal que al ejecutarse con python main.py reproduzca todos los resultados:
-# carga de datos, preprocesado, entrenamiento de todos los modelos, evaluación y guardado de gráficas. 
-# El enunciado lo exige explícitamente.
-
-# smote
-
-import random
 import numpy as np
 import pandas as pd
 from src.models import neural_network as nn
@@ -15,7 +8,6 @@ from src import eda as eda
 from src import evaluation as ev
 from src import validation as val
 from src import learning_curves as lc
-import matplotlib.pyplot as plt
 import os
 
 directorio = '/Users/pabloag/uni/loan_aproval/Proyecto/'
@@ -44,7 +36,7 @@ def neural_network(X_train, X_val, y_train):
         num_labels=1, 
         alpha=0.1, 
         num_iters=1200, 
-        hidden_size=16, 
+        hidden_size=8, 
         reg=0, 
         input_size=X_train.shape[1])
 
@@ -76,6 +68,7 @@ def main():
         print("\n2. ANALISIS EXPLORATORIO DE DATOS")
         eda.show_dataset_info(df, plot=False)
         eda.impagos(df)
+        eda.outliers(df)
     else:
         print("EDA omitido.")
 
@@ -84,7 +77,6 @@ def main():
     print(f"Train: {X_train.shape[0]} ejemplos")
     print(f"Test : {X_test.shape[0]} ejemplos")
 
-    print("\n4. CURVAS")
     X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(
         X_train,
         X_test,
@@ -99,59 +91,64 @@ def main():
         y_test
     )
 
-    print("Generando curva de entrenamiento de regresion logistica...")
-    _, _, J_history_lr = lr.train(
-        X_train_lr,
-        y_train_lr,
-        np.zeros(X_train_lr.shape[1]),
-        0,
-        alpha=0.1,
-        num_iters=3000,
-        lambda_=1
-    )
+    ejecutar_curvas = input("Quieres generar las curvas? (s/n): ").strip().lower()
+    if ejecutar_curvas == "s":
+        print("\n4. CURVAS")
+        print("Generando curva de entrenamiento de regresion logistica...")
+        _, _, J_history_lr = lr.train(
+            X_train_lr,
+            y_train_lr,
+            np.zeros(X_train_lr.shape[1]),
+            0,
+            alpha=0.1,
+            num_iters=3000,
+            lambda_=1
+        )
 
-    print("Generando curva de entrenamiento de red neuronal...")
-    _, _, J_history_nn = nn.train(
-        X_train_nn,
-        y_train_nn,
-        num_labels=1,
-        alpha=0.1,
-        num_iters=3000,
-        hidden_size=16,
-        reg=0,
-        input_size=X_train_nn.shape[1]
-    )
+        print("Generando curva de entrenamiento de red neuronal...")
+        _, _, J_history_nn = nn.train(
+            X_train_nn,
+            y_train_nn,
+            num_labels=1,
+            alpha=0.1,
+            num_iters=3000,
+            hidden_size=16,
+            reg=0,
+            input_size=X_train_nn.shape[1]
+        )
 
-    lc.plot_training_curve(J_history_lr, "Curva de entrenamiento - Regresion logistica")
-    lc.plot_training_curve(J_history_nn, "Curva de entrenamiento - Red neuronal")
+        lc.plot_training_curve(J_history_lr, "Curva de entrenamiento - Regresion logistica")
+        lc.plot_training_curve(J_history_nn, "Curva de entrenamiento - Red neuronal")
 
-    print("Generando learning curve de regresion logistica...")
-    lc.learning_curve_cv(
-        X_train,
-        y_train,
-        logistic_regression,
-        folds=2,
-        lr=True,
-        title="Learning curve - Regresion logistica"
-    )
+        print("Generando learning curve de regresion logistica...")
+        lc.learning_curve_cv(
+            X_train,
+            y_train,
+            logistic_regression,
+            folds=2,
+            lr=True,
+            title="Learning curve - Regresion logistica"
+        )
 
-    print("Generando learning curve de red neuronal...")
-    lc.learning_curve_cv(
-        X_train,
-        y_train,
-        neural_network,
-        folds=2,
-        title="Learning curve - Red neuronal"
-    )
+        print("Generando learning curve de red neuronal...")
+        lc.learning_curve_cv(
+            X_train,
+            y_train,
+            neural_network,
+            folds=2,
+            title="Learning curve - Red neuronal"
+        )
 
-    print("Generando curva de validacion de la red neuronal...")
-    lc.validation_curve_cv(
-        X_train,
-        y_train,
-        hidden_sizes=[2, 4, 8, 16, 32],
-        folds=3,
-        num_iters=1200
-    )
+        print("Generando curva de validacion de la red neuronal...")
+        lc.validation_curve_cv(
+            X_train,
+            y_train,
+            hidden_sizes=[2, 4, 8, 16, 32],
+            folds=3,
+            num_iters=1200
+        )
+    else:
+        print("Curvas omitidas.")
 
     print("\n5. VALIDACION CRUZADA SIN BALANCEO")
     print("Regresion logistica:")

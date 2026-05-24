@@ -3,8 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import math
-from sklearn.cluster import KMeans
-
 
 # EDA multivariable
 def show_dataset_info(df, plot=False):
@@ -72,7 +70,8 @@ def show_dataset_info(df, plot=False):
             'Loan Status': status,
         }
 
-        save_dir = '/results/figures/eda/'
+        project_dir = os.path.dirname(os.path.dirname(__file__))
+        save_dir = os.path.join(project_dir, 'results', 'figures', 'eda')
         os.makedirs(save_dir, exist_ok=True)
 
         # --- Figura 1: todas las distribuciones individuales ---
@@ -140,6 +139,28 @@ def impagos(df):
 
     print('Precision sin impago')
     print(pago)
+
+
+def outliers(df):
+    """Muestra un resumen sencillo de outliers sin modificar el dataset."""
+    numeric_cols = df.select_dtypes(include=[np.number]).columns.drop("loan_status")
+
+    print("Outliers detectados con criterio IQR:")
+    print("------------------------------------")
+    for col in numeric_cols:
+        q1 = df[col].quantile(0.25)
+        q3 = df[col].quantile(0.75)
+        iqr = q3 - q1
+        low = q1 - 1.5 * iqr
+        high = q3 + 1.5 * iqr
+        mask = (df[col] < low) | (df[col] > high)
+        print(f"{col}: {mask.sum()} casos ({mask.mean() * 100:.2f}%)")
+
+    print("\nCasos claramente sospechosos:")
+    print("-----------------------------")
+    print(f"Edad > 100: {(df['person_age'] > 100).sum()} casos")
+    print(f"Experiencia > 60: {(df['person_emp_exp'] > 60).sum()} casos")
+    print(f"Ingresos > 1M: {(df['person_income'] > 1_000_000).sum()} casos")
 
 if __name__ == "__main__":
     pass

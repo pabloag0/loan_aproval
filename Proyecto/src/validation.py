@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 from src import evaluation as ev
 from sklearn.model_selection import StratifiedKFold

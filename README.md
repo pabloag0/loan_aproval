@@ -47,7 +47,9 @@ El proyecto compara tres modelos:
 Ademas, se incluyen:
 
 - Analisis exploratorio de datos.
+- Analisis sencillo de outliers.
 - Preprocesado de variables categoricas y normalizacion.
+- Limpieza conservadora de registros claramente sospechosos.
 - Division train/test estratificada.
 - Validacion cruzada estratificada.
 - Evaluacion con accuracy, precision, recall y F1.
@@ -101,27 +103,56 @@ Desde la carpeta del proyecto:
 python Proyecto/main.py
 ```
 
-Durante la ejecucion, el programa pregunta si se quiere ejecutar el analisis
-exploratorio de datos:
+Durante la ejecucion, el programa pregunta primero si se quiere ejecutar el
+analisis exploratorio de datos:
 
 ```text
 Quieres ejecutar el EDA? (s/n):
 ```
 
-Si se responde `s`, se muestra el analisis exploratorio. Si se responde `n`, el
-programa continua directamente con el entrenamiento, validacion y evaluacion de
-los modelos.
+Si se responde `s`, se muestra el analisis exploratorio, el analisis de la
+variable de defaults previos y el resumen de outliers. Si se responde `n`, el
+programa continua directamente.
+
+Despues del split, el programa pregunta si se quieren generar las curvas:
+
+```text
+Quieres generar las curvas? (s/n):
+```
+
+Si se responde `s`, se generan las curvas de entrenamiento, learning curves y
+validation curve. Si se responde `n`, se omiten para que la ejecucion sea mas
+rapida. Omitir las curvas no afecta a la validacion cruzada ni a la evaluacion
+final en test.
 
 El programa ejecuta el flujo principal en este orden:
 
 1. Carga del dataset.
 2. Analisis exploratorio opcional.
-3. Division en train y test.
-4. Generacion de curvas.
+3. Limpieza conservadora de outliers y division en train/test.
+4. Generacion opcional de curvas.
 5. Validacion cruzada sin balanceo.
 6. Evaluacion final en test sin balanceo.
 7. Validacion cruzada con balanceo.
 8. Evaluacion final en test con balanceo.
+
+## Limpieza de outliers
+
+El dataset original contiene 45.000 filas. Antes de separar train y test se
+eliminan solo registros claramente sospechosos mediante reglas sencillas:
+
+- `person_age <= 100`
+- `person_emp_exp <= 60`
+- `person_income <= 1_000_000`
+
+Esta limpieza elimina 31 filas, quedando 44.969 ejemplos. La division
+estratificada resultante es:
+
+- Train: 35.975 ejemplos.
+- Test: 8.994 ejemplos.
+
+La limpieza es conservadora: no se eliminan todos los outliers estadisticos,
+solo valores extremos poco plausibles.
 
 ## Reproducibilidad
 
@@ -132,8 +163,7 @@ data/loan_data.csv
 ```
 
 Para reproducir los resultados descritos en la memoria, ejecutar el programa
-principal desde `Proyecto/main.py`. Algunas partes, como el entrenamiento de
-redes neuronales, pueden tardar varios minutos dependiendo del ordenador.
-
-Nota: si se mueve la carpeta del proyecto a otra ubicacion, puede ser necesario
-actualizar la variable `directorio` definida al principio de `main.py`.
+principal desde `Proyecto/main.py`. Para reproducir tambien las graficas,
+responder `s` cuando el programa pregunte si se quieren generar las curvas.
+Algunas partes, como el entrenamiento de redes neuronales y la generacion de
+curvas, pueden tardar varios minutos dependiendo del ordenador.

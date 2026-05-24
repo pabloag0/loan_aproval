@@ -3,27 +3,6 @@ import torch
 import torch.nn as nn
 
 
-class DeepNeuralNetwork(nn.Module):
-    """Red neuronal sencilla para clasificacion binaria."""
-
-    def __init__(self, input_size):
-        super().__init__()
-
-        self.red = nn.Sequential(
-            nn.Linear(input_size, 32),
-            nn.ReLU(),
-            nn.Linear(32, 16),
-            nn.ReLU(),
-            nn.Linear(16, 8),
-            nn.ReLU(),
-            nn.Linear(8, 1),
-            nn.Sigmoid()
-        )
-
-    def forward(self, x):
-        return self.red(x)
-
-
 def _convertir_a_tensores(X, y):
     X_tensor = torch.tensor(np.asarray(X), dtype=torch.float32)
     y_tensor = torch.tensor(np.asarray(y).reshape(-1, 1), dtype=torch.float32)
@@ -41,7 +20,16 @@ def entrenar(X_train, y_train, seed=42):
     y_train_tensor = y_train_tensor.to(device)
 
     input_size = X_train_tensor.shape[1]
-    model = DeepNeuralNetwork(input_size=input_size).to(device)
+    model = nn.Sequential(
+        nn.Linear(input_size, 32),
+        nn.ReLU(),
+        nn.Linear(32, 16),
+        nn.ReLU(),
+        nn.Linear(16, 8),
+        nn.ReLU(),
+        nn.Linear(8, 1),
+        nn.Sigmoid()
+    ).to(device)
 
     loss_function = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -62,9 +50,8 @@ def entrenar(X_train, y_train, seed=42):
         loss.backward()
         optimizer.step()
 
-        if epoch % 20 == 0 or epoch == epochs - 1:
+        #if epoch % 20 == 0 or epoch == epochs - 1:
             #print(f"Epoca {epoch + 1:3d}/{epochs}: loss = {loss.item():.4f}")
-            pass
 
     return model
 

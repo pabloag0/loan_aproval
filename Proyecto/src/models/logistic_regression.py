@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 import math
-import matplotlib.pyplot as plt
+
 
 def sigmoid(z):
     
@@ -111,47 +111,16 @@ def train(X, y, w_in=None, b_in=0, alpha=0.01, num_iters=1000, lambda_=None):
                 cost = compute_cost(X, y, w, b)
 
             J_history.append(cost)
-        if i % math.ceil(num_iters / 10) == 0 or i == num_iters - 1:
+        #if i % math.ceil(num_iters / 10) == 0 or i == num_iters - 1:
             #print(f"Iteraticion {i:4d}: Cost {float(J_history[-1]):8.2f}   ")
-            pass
+            
 
 
     return w, b, J_history
 
-
-#########################################################################
-# plot_data
-#
-def plot_data(X, y, pos_label="y=1", neg_label="y=0"):
-    """
-    Plots the data points X and y into a new figure
-    Args:
-        X : (ndarray Shape (m, 2))
-        y : (ndarray Shape (m,))
-        pos_label: Label for positive examples
-        neg_label: Label for negative examples
-    """
-    positive = y == 1
-    negative = y == 0
-
-    plt.plot(X[positive, 0], X[positive, 1], 'k+', label=pos_label, markersize=7, markeredgewidth=2)
-    plt.plot(X[negative, 0], X[negative, 1], 'yo', label=neg_label, markersize=7)
-
-
 #########################################################################
 # predict
 #
-"""
-def predict(X, w, b):
-    z = np.dot(X, w) + b
-    p = (sigmoid(z) >= 0.5).astype(int)
-
-    # Regla determinista: si la última columna es 1 → predicción 0
-    mask = X.iloc[:, -1] == 1
-    p[mask] = 0
-
-    return p
-"""
 def predict(X, w, b):
 
     z = np.dot(X, w) + b

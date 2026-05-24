@@ -88,7 +88,8 @@ def cost(theta1, theta2, X, y, lambda_):
 
     return J
 
-def train(X, y, input_size, hidden_size, num_labels, reg, alpha, num_iters=2500): #Hidden size es el numero de neuronas que hay en la capa oculta, num_labels es el numero de clases que hay
+def train(X, y, input_size, hidden_size, num_labels, reg, alpha, num_iters=2500, r_seed=42): #Hidden size es el numero de neuronas que hay en la capa oculta, num_labels es el numero de clases que hay
+    np.random.seed(r_seed)
 
     theta1 = (np.random.rand(hidden_size, (input_size + 1)) - 0.5) * 0.25
     theta2 = (np.random.rand(num_labels, (hidden_size + 1)) - 0.5) * 0.25
