@@ -27,7 +27,7 @@ def evaluate(y_pred, y_test, mostrar=False, show_matrix=False, matrix_name=None)
     f1 = f1_score(y_test, y_pred) * 100
 
     if mostrar:
-        print(f"Acuraccy: {accuracy}%")
+        print(f"Accuracy: {accuracy}%")
         print(f"Precision: {precision}%")
         print(f"Recall: {recall}%")
         print(f"F1: {f1}%")

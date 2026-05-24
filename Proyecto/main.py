@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import os
 from src.models import neural_network as nn
 from src.models import logistic_regression as lr
 from src.models import deep_neural_network as dnn
@@ -8,7 +9,6 @@ from src import eda as eda
 from src import evaluation as ev
 from src import validation as val
 from src import learning_curves as lc
-import os
 
 def logistic_regression(X_train, X_val, y_train):
     w, b, _ = lr.train(
@@ -56,7 +56,8 @@ def main():
     print("---------------------------------------")
     print("\n1. CARGA DE DATOS")
     print("Cargando datos...")
-    df = pd.read_csv("data/loan_data.csv")
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    df = pd.read_csv(os.path.join(project_dir, "data", "loan_data.csv"))
     print(f"Dataset cargado: {df.shape[0]} filas, {df.shape[1]} columnas")
 
     ejecutar_eda = input("Quieres ejecutar el EDA? (s/n): ").strip().lower()

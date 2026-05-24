@@ -29,9 +29,9 @@ Proyecto/
 │       ├── neural_network.py
 │       └── deep_neural_network.py
 ├── results/
+│   ├── confusion_matrix/
 │   ├── curves/
-│   ├── eda/
-│   └── preprocessing/
+│   └── eda/
 └── report/
 ```
 
@@ -62,7 +62,7 @@ Las imagenes generadas por el proyecto se guardan en `Proyecto/results/`:
 
 - `Proyecto/results/eda/`: graficas del analisis exploratorio.
 - `Proyecto/results/curves/`: curvas de entrenamiento, learning curves y validation curves.
-- `Proyecto/results/preprocessing/`: espacio reservado para graficas o salidas de preprocesado.
+- `Proyecto/results/confusion_matrix/`: matrices de confusion finales sobre test.
 
 ## Instalacion del entorno
 
@@ -184,7 +184,7 @@ SMOTE se implementa con `imbalanced-learn`, por eso esta libreria aparece en
 El dataset necesario se incluye en:
 
 ```text
-data/loan_data.csv
+Proyecto/data/loan_data.csv
 ```
 
 Para reproducir los resultados descritos en la memoria, ejecutar el programa

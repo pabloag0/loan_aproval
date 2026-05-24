@@ -84,10 +84,6 @@ def balance_by_loan_status(X, y, random_state=42):
     return X_balanced, y_balanced
 
 def preprocess(X_train, X_test, y_train, y_test, lr=False, undersampling=False, oversampling=False):
-    
-    # faltra filtrar por y tambien
-    # X_train = handle_outliers(X_train)
-    # X_test = handle_outliers(X_test)
 
     if undersampling:
         X_train, y_train = balance_by_loan_status(X_train, y_train)
