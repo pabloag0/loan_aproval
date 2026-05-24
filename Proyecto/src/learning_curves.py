@@ -70,7 +70,7 @@ def plot_learning_curve(x_values, train_scores, val_scores, title, xlabel):
     plt.show()
 
 
-def learning_curve_cv(X, y, train, train_sizes=None, folds=3, lr=False, balance=False, title="Learning curve"):
+def learning_curve_cv(X, y, train, train_sizes=None, folds=3, lr=False, undersampling=False, title="Learning curve"):
     if train_sizes is None:
         train_sizes = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1.0]
 
@@ -104,7 +104,7 @@ def learning_curve_cv(X, y, train, train_sizes=None, folds=3, lr=False, balance=
                 y_train,
                 y_val,
                 lr=lr,
-                balance=balance
+                undersampling=undersampling
             )
 
             y_pred_train = train(X_train, X_train, y_train)
@@ -131,7 +131,7 @@ def validation_curve_cv(
     y,
     hidden_sizes=None,
     folds=3,
-    balance=False,
+    undersampling=False,
     alpha=0.1,
     num_iters=1200,
     reg=0
@@ -159,7 +159,7 @@ def validation_curve_cv(
                 X_val,
                 y_train,
                 y_val,
-                balance=balance
+                undersampling=undersampling
             )
 
             theta1, theta2, _ = nn.train(

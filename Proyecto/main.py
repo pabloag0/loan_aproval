@@ -174,17 +174,17 @@ def main():
     print("Red neuronal profunda:")
     ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True)
 
-    print("\n7. VALIDACION CRUZADA CON BALANCEO")
+    print("\n7. VALIDACION CRUZADA CON UNDERSAMPLING")
     X_train, X_test, y_train, y_test = pp.split(df)
 
     print("Regresion logistica:")
-    val.cross_validate(X_train, y_train, logistic_regression, folds=5, lr=True, balance=True)
+    val.cross_validate(X_train, y_train, logistic_regression, folds=5, lr=True, undersampling=True)
 
     print("Red neuronal:")
-    val.cross_validate(X_train, y_train, neural_network, folds=5, balance=True)
+    val.cross_validate(X_train, y_train, neural_network, folds=5, undersampling=True)
 
     print("Red neuronal profunda:")
-    val.cross_validate(X_train, y_train, deep_neural_network, folds=5, balance=True)
+    val.cross_validate(X_train, y_train, deep_neural_network, folds=5, undersampling=True)
 
     print("\n8. TEST CON BALANCEO")
     X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(
@@ -193,14 +193,56 @@ def main():
         y_train,
         y_test,
         lr=True,
-        balance=True
+        undersampling=True
     )
     X_train_nn, X_test_nn, y_train_nn, y_test_nn = pp.preprocess(
         X_train,
         X_test,
         y_train,
         y_test,
-        balance=True
+        undersampling=True
+    )
+
+    y_pred_lr = logistic_regression(X_train_lr, X_test_lr, y_train_lr)
+    y_pred_nn = neural_network(X_train_nn, X_test_nn, y_train_nn)
+    y_pred_dnn = deep_neural_network(X_train_nn, X_test_nn, y_train_nn)
+
+    print("Regresion logistica:")
+    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True)
+
+    print("Red neuronal:")
+    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True)
+
+    print("Red neuronal profunda:")
+    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True)
+
+    print("\n9. VALIDACION CRUZADA CON OVERSAMPLING")
+    X_train, X_test, y_train, y_test = pp.split(df)
+
+    print("Regresion logistica:")
+    val.cross_validate(X_train, y_train, logistic_regression, folds=5, lr=True, oversampling=True)
+
+    print("Red neuronal:")
+    val.cross_validate(X_train, y_train, neural_network, folds=5, oversampling=True)
+
+    print("Red neuronal profunda:")
+    val.cross_validate(X_train, y_train, deep_neural_network, folds=5, oversampling=True)
+
+    print("\n10. TEST CON OVERSAMPLING")
+    X_train_lr, X_test_lr, y_train_lr, y_test_lr = pp.preprocess(
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+        lr=True,
+        oversampling=True
+    )
+    X_train_nn, X_test_nn, y_train_nn, y_test_nn = pp.preprocess(
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+        oversampling=True
     )
 
     y_pred_lr = logistic_regression(X_train_lr, X_test_lr, y_train_lr)

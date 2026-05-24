@@ -80,29 +80,32 @@ def balance_by_loan_status(X, y, random_state=42):
 
     return X_balanced, y_balanced
 
-def preprocess(X_train, X_test, y_train, y_test, lr=False, balance=False):
+def preprocess(X_train, X_test, y_train, y_test, lr=False, undersampling=False, oversampling=False):
     
     # faltra filtrar por y tambien
     # X_train = handle_outliers(X_train)
     # X_test = handle_outliers(X_test)
 
-    if balance:
+    if undersampling:
         X_train, y_train = balance_by_loan_status(X_train, y_train)
-
 
     X_train = encode_categoricals(X_train)
     X_test = encode_categoricals(X_test)
 
     X_train, X_test = normalize(X_train, X_test)
 
-    y_train = y_train.to_numpy()
-    y_test = y_test.to_numpy()
+    if oversampling:
+        SMOTE_obj = SMOTE(random_state=42)
+        X_train, y_train = SMOTE_obj.fit_resample(X_train, y_train)
+
+    y_train = np.asarray(y_train)
+    y_test = np.asarray(y_test)
 
     if lr:
         return X_train, X_test, y_train.ravel(), y_test.ravel()
     
-    X_train = X_train.to_numpy()
-    X_test = X_test.to_numpy()
+    X_train = np.asarray(X_train)
+    X_test = np.asarray(X_test)
     y_train = y_train.reshape(-1, 1)
     y_test = y_test.reshape(-1, 1)
 

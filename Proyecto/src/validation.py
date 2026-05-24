@@ -7,7 +7,7 @@ from src import preprocess as pp
 ##############################################################################
 # CROSS VALIDATION
 
-def cross_validate(X, y, train, folds=5, lr=False, balance=False):
+def cross_validate(X, y, train, folds=5, lr=False, undersampling=False, oversampling=False):
     """Valida un modelo con Stratified K-Fold.
 
     La funcion train debe recibir X_train, X_val, y_train y devolver y_pred
@@ -42,7 +42,8 @@ def cross_validate(X, y, train, folds=5, lr=False, balance=False):
             y_train,
             y_val,
             lr=lr,
-            balance=balance
+            undersampling=undersampling,
+            oversampling=oversampling
         )
 
         y_val = np.asarray(y_val).reshape(-1)
