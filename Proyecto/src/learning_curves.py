@@ -1,10 +1,27 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 from sklearn.metrics import f1_score
 from sklearn.model_selection import StratifiedKFold, train_test_split
 
 from src import preprocess as pp
 from src.models import neural_network as nn
+
+
+def get_curves_dir():
+    project_dir = os.path.dirname(os.path.dirname(__file__))
+    save_dir = os.path.join(project_dir, "results", "figures", "curves")
+    os.makedirs(save_dir, exist_ok=True)
+    return save_dir
+
+
+def safe_filename(title):
+    return (
+        title.lower()
+        .replace(" - ", "_")
+        .replace(" ", "_")
+        .replace(":", "")
+    )
 
 
 def plot_training_curve(J_history, title):
@@ -14,6 +31,11 @@ def plot_training_curve(J_history, title):
     plt.ylabel("Coste")
     plt.title(title)
     plt.grid(True)
+    plt.savefig(
+        os.path.join(get_curves_dir(), f"{safe_filename(title)}.png"),
+        dpi=150,
+        bbox_inches="tight"
+    )
     plt.show()
 
 
@@ -40,6 +62,11 @@ def plot_learning_curve(x_values, train_scores, val_scores, title, xlabel):
     plt.title(title)
     plt.legend()
     plt.grid(True)
+    plt.savefig(
+        os.path.join(get_curves_dir(), f"{safe_filename(title)}.png"),
+        dpi=150,
+        bbox_inches="tight"
+    )
     plt.show()
 
 
