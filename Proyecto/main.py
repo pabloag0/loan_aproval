@@ -10,8 +10,6 @@ from src import validation as val
 from src import learning_curves as lc
 import os
 
-directorio = '/Users/pabloag/uni/loan_aproval/Proyecto/'
-
 def logistic_regression(X_train, X_val, y_train):
     w, b, _ = lr.train(
         X_train,
@@ -54,13 +52,11 @@ def deep_neural_network(X_train, X_val, y_train):
 
 
 def main():
-    os.system('clear')
-
     print("\nPROYECTO DE CLASIFICACION DE PRESTAMOS")
     print("---------------------------------------")
     print("\n1. CARGA DE DATOS")
     print("Cargando datos...")
-    df = pd.read_csv(directorio + "data/loan_data.csv")
+    df = pd.read_csv("data/loan_data.csv")
     print(f"Dataset cargado: {df.shape[0]} filas, {df.shape[1]} columnas")
 
     ejecutar_eda = input("Quieres ejecutar el EDA? (s/n): ").strip().lower()
@@ -167,13 +163,13 @@ def main():
     y_pred_dnn = deep_neural_network(X_train_nn, X_test_nn, y_train_nn)
 
     print("Regresion logistica:")
-    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True, show_matrix=True)
+    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True, show_matrix=True, matrix_name="test_sin_balanceo_regresion_logistica")
 
     print("Red neuronal:")
-    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True, show_matrix=True)
+    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True, show_matrix=True, matrix_name="test_sin_balanceo_red_neuronal")
 
     print("Red neuronal profunda:")
-    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True, show_matrix=True)
+    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True, show_matrix=True, matrix_name="test_sin_balanceo_red_neuronal_profunda")
 
     print("\n7. VALIDACION CRUZADA CON UNDERSAMPLING")
     X_train, X_test, y_train, y_test = pp.split(df)
@@ -209,13 +205,13 @@ def main():
     y_pred_dnn = deep_neural_network(X_train_nn, X_test_nn, y_train_nn)
 
     print("Regresion logistica:")
-    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True, show_matrix=True)
+    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True, show_matrix=True, matrix_name="test_undersampling_regresion_logistica")
 
     print("Red neuronal:")
-    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True, show_matrix=True)
+    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True, show_matrix=True, matrix_name="test_undersampling_red_neuronal")
 
     print("Red neuronal profunda:")
-    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True, show_matrix=True)
+    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True, show_matrix=True, matrix_name="test_undersampling_red_neuronal_profunda")
 
     print("\n9. VALIDACION CRUZADA CON OVERSAMPLING")
     X_train, X_test, y_train, y_test = pp.split(df)
@@ -251,13 +247,13 @@ def main():
     y_pred_dnn = deep_neural_network(X_train_nn, X_test_nn, y_train_nn)
 
     print("Regresion logistica:")
-    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True, show_matrix=True)
+    ev.evaluate(y_pred_lr, y_test_lr, mostrar=True, show_matrix=True, matrix_name="test_oversampling_regresion_logistica")
 
     print("Red neuronal:")
-    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True, show_matrix=True)
+    ev.evaluate(y_pred_nn, y_test_nn, mostrar=True, show_matrix=True, matrix_name="test_oversampling_red_neuronal")
 
     print("Red neuronal profunda:")
-    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True, show_matrix=True)
+    ev.evaluate(y_pred_dnn, y_test_nn, mostrar=True, show_matrix=True, matrix_name="test_oversampling_red_neuronal_profunda")
 
     print("\nFIN")
     input('Pulsa Enter para cerrar el programa..')
